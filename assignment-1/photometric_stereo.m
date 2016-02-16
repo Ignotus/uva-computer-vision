@@ -47,6 +47,20 @@ function photometric_stereo()
     p(isnan(p)) = 0;
     q(isnan(q)) = 0;
     
+    %% Second order partial derivative check
+    %% http://www.ifp.illinois.edu/~nemanja/cvpr01.pdf . Formula 5
+    for i=1:w-1
+        for j=1:h-1
+            dq = q(i, j) - q(i + 1, j);
+            dp = p(i, j) - p(i, j + 1);
+ 
+            if (dp - dq) ^ 2 > 0.005
+                q(i, j) = 0;
+                p(i, j) = 0;
+            end
+        end
+    end
+   
     Z = zeros(w, h);
     j = 1; %% left column
     for i=2:h
@@ -92,6 +106,6 @@ function photometric_stereo()
     hold on
     quiver3(X_subsampled, Y_subsampled, Z_subsampled, U, V, W, 0.5);
     %legend('Surface', 'Surface normals');
-    title(strcat('V_x = ', int2str(v_x), '; V_y = ', int2str(v_y), '; V_z = ', int2str(v_z)));
+    title(strcat('V_x = ', int2str(v_x), '; V_y = ', int2str(v_y), '; V_z = ', int2str(v_z), '; k = ', int2str(k)));
     hold off
 end
