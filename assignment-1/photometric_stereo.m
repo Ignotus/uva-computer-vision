@@ -5,7 +5,9 @@ function photometric_stereo()
     img4 = imread('sphere4.png');
     img5 = imread('sphere5.png');
     
-    v_x = 5;
+    k = 1;
+    
+    v_x = 1;
     v_y = 1;
     v_z = 1;
     V = [[ 0  0 v_z];
@@ -18,6 +20,8 @@ function photometric_stereo()
     N = sqrt(sum(abs(V).^2, 2));
     V = bsxfun(@rdivide, V, N);
     
+    V = k * V;
+    
     [w, h] = size(img1);
     g = zeros(w, h, 3);
     for i=1:w
@@ -26,16 +30,14 @@ function photometric_stereo()
             
             %% first compute g(i, j). linsolve seems to produce more precise
             %% result than with pseudo invert matrix
-            g(i, j, :) = linsolve(V, Idiag);
-            % I = diag(Idiag);
-            
-            %% TODO: Mention in comments the good reason to multiply both parts with I
-            %g(i, j, :) = pinv(I * V) * (Idiag.^2);
+            I = diag(Idiag);
+            [g(i, j, :), ~] = linsolve(I * V, Idiag.^2);
         end
     end
     
     % Computes albedo
-    albedo = sqrt(sum(abs(g).^2, 3));
+    albedo = sqrt(sum(g.^2, 3));
+    
     % Normalize pixel norms
     N = bsxfun(@rdivide, g, albedo);
  
@@ -57,7 +59,7 @@ function photometric_stereo()
         end
     end
     
-    [X_subsampled, Y_subsampled] = meshgrid(1:32:512, 1:32:512);
+    [X_subsampled, Y_subsampled] = meshgrid(1:10:512, 1:10:512);
     w = length(X_subsampled);
     Z_subsampled = zeros(w, w);
     
@@ -67,13 +69,29 @@ function photometric_stereo()
         end
     end
     
-    figure('Name', 'Surface');
-    mesh(X_subsampled, Y_subsampled, Z_subsampled);
     [U, V, W] = surfnorm(X_subsampled, Y_subsampled, Z_subsampled);
+    
+    figure;
+    subplot(2, 2, 1);
+    imshow(albedo);
+    title('Albedo');
+    
+    subplot(2, 2, 2);
+    mesh(X_subsampled, Y_subsampled, Z_subsampled);
+    xlabel('x'),ylabel('y'),zlabel('z');
+    title('Surface mesh');
+    
+    subplot(2, 2, 3);
+    quiver3(X_subsampled, Y_subsampled, Z_subsampled, U, V, W, 0.5);
+    xlabel('x'),ylabel('y'),zlabel('z');
+    title('Surface normals');
+    
+    subplot(2, 2, 4);
+    mesh(X_subsampled, Y_subsampled, Z_subsampled);
     xlabel('x'),ylabel('y'),zlabel('z');
     hold on
     quiver3(X_subsampled, Y_subsampled, Z_subsampled, U, V, W, 0.5);
-    legend('Surface', 'Surface normals');
+    %legend('Surface', 'Surface normals');
     title(strcat('V_x = ', int2str(v_x), '; V_y = ', int2str(v_y), '; V_z = ', int2str(v_z)));
     hold off
 end
