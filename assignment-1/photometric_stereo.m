@@ -9,7 +9,7 @@ function photometric_stereo()
     
     v_x = 1;
     v_y = 1;
-    v_z = 1;
+    v_z = 0.5;
     V = [[ 0  0 v_z];
          [-v_x  v_y v_z];
          [ v_x  v_y v_z];
@@ -47,14 +47,15 @@ function photometric_stereo()
     p(isnan(p)) = 0;
     q(isnan(q)) = 0;
     
+    deriv2_diff = zeros(w, h);
     %% Second order partial derivative check
     %% http://www.ifp.illinois.edu/~nemanja/cvpr01.pdf . Formula 5
     for i=1:w-1
         for j=1:h-1
             dq = q(i, j) - q(i + 1, j);
             dp = p(i, j) - p(i, j + 1);
- 
-            if (dp - dq) ^ 2 > 0.005
+            deriv2_diff(i, j) = (dp - dq) ^ 2;
+            if deriv2_diff(i, j) > 0.005
                 q(i, j) = 0;
                 p(i, j) = 0;
             end
@@ -73,7 +74,7 @@ function photometric_stereo()
         end
     end
     
-    [X_subsampled, Y_subsampled] = meshgrid(1:10:512, 1:10:512);
+    [X_subsampled, Y_subsampled] = meshgrid(1:32:512, 1:32:512);
     w = length(X_subsampled);
     Z_subsampled = zeros(w, w);
     
@@ -86,12 +87,14 @@ function photometric_stereo()
     [U, V, W] = surfnorm(X_subsampled, Y_subsampled, Z_subsampled);
     
     figure;
+    title(strcat('V_x = ', int2str(v_x), '; V_y = ', int2str(v_y), '; V_z = ', int2str(v_z), '; k = ', int2str(k)));
+    
     subplot(2, 2, 1);
     imshow(albedo);
     title('Albedo');
     
     subplot(2, 2, 2);
-    mesh(X_subsampled, Y_subsampled, Z_subsampled);
+    surf(X_subsampled, Y_subsampled, Z_subsampled, gradient(Z_subsampled));
     xlabel('x'),ylabel('y'),zlabel('z');
     title('Surface mesh');
     
@@ -101,11 +104,8 @@ function photometric_stereo()
     title('Surface normals');
     
     subplot(2, 2, 4);
-    mesh(X_subsampled, Y_subsampled, Z_subsampled);
-    xlabel('x'),ylabel('y'),zlabel('z');
-    hold on
-    quiver3(X_subsampled, Y_subsampled, Z_subsampled, U, V, W, 0.5);
-    %legend('Surface', 'Surface normals');
-    title(strcat('V_x = ', int2str(v_x), '; V_y = ', int2str(v_y), '; V_z = ', int2str(v_z), '; k = ', int2str(k)));
-    hold off
+    [X, Y] = meshgrid(1:512, 1:512);
+    surf(X, Y, deriv2_diff, gradient(deriv2_diff));
+    xlabel('x'),ylabel('y'),zlabel('deriv2_diff');
+    title('Second order derivatives squared difference');
 end
