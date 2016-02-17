@@ -5,16 +5,15 @@ function photometric_stereo()
     img4 = imread('sphere4.png');
     img5 = imread('sphere5.png');
     
-    k = 1;
-    
+    k = 200;
     v_x = 1;
     v_y = 1;
     v_z = 0.5;
-    V = [[ 0  0 v_z];
-         [-v_x  v_y v_z];
-         [ v_x  v_y v_z];
-         [-v_x -v_y v_z];
-         [ v_x -v_y v_z]];
+    V = [[ 0    0   -v_z];
+         [ v_x -v_y -v_z];
+         [-v_x -v_y -v_z];
+         [ v_x  v_y -v_z];
+         [-v_x  v_y -v_z]];
 
     %% Absolute lengths of V
     N = sqrt(sum(abs(V).^2, 2));
