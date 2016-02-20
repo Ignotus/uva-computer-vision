@@ -1,5 +1,5 @@
 function G = gaussian(sigma, kernelLength)
-    radius = round(kernelLength / 2);
+    radius = floor(kernelLength / 2);
     G = zeros(kernelLength, 1);
     coef = 1 / (sigma * sqrt(2 * pi));
     
