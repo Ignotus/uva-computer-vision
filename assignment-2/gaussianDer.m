@@ -1,5 +1,6 @@
 function [imOut, Gd] = gaussianDer(image_path, G, sigma)
     img = im2double(imread(image_path));
+
     [w, ~] = size(G);
     Gd = zeros(w, 1);
     radius = floor(w / 2);
@@ -11,12 +12,15 @@ function [imOut, Gd] = gaussianDer(image_path, G, sigma)
     imOut = zeros(h, w, d);
     for x=radius+1:w-radius
         for y=1:h
-            for z=1:3
+            for z=1:d
                 imOut(y, x, z) = sum(Gd' .* img(y, x-radius:x+radius, z));
             end
         end
     end
     
     %% Multiplying with 50 to increase intensity
-    imshow(50 * im2double(imOut));
+    plot = false;
+    if plot
+        imshow(30 * im2double(imOut));
+    end
 end
