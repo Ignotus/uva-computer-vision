@@ -35,13 +35,13 @@ function [v] = optical_flow(img1_path, img2_path)
                 for j=0:14
                     idx = j * 15 + i + 1;
                     A(idx,:) = Id(j + y, i + x,1:2);
-                    b(idx, 1) = Id(j + y, i + x,3);
+                    b(idx, 1) = -Id(j + y, i + x,3);
                 end
             end
             
             v_x = (x + 14) / 15;
             v_y = (y + 14) / 15;
-            v(v_y, v_x,:) = linsolve(A' * A, -A' * b);
+            v(v_y, v_x,:) = linsolve(A' * A, A' * b);
         end
     end
     

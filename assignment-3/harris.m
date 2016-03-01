@@ -68,10 +68,9 @@ function [H, r, c] = harris(image_path)
             
             if is_not_max == false
                 c = [c y];
-                r = [c x];
+                r = [r x];
                 plot(x, y, 'go');
             end
         end
     end
 end
-
