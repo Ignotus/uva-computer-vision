@@ -1,4 +1,4 @@
-function harris(image_path)
+function [H, r, c] = harris(image_path)
     img = im2double(imread(image_path));
     
     kernel_length = 11;
@@ -47,6 +47,9 @@ function harris(image_path)
     imshow(img);
     hold on;
     radius = 5;
+    
+    r = [];
+    c = [];
     for x=radius+1:w-radius
         for y=radius+1:h-radius
             ch = H(y, x);
@@ -64,6 +67,8 @@ function harris(image_path)
             end
             
             if is_not_max == false
+                c = [c y];
+                r = [c x];
                 plot(x, y, 'go');
             end
         end
