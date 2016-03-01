@@ -46,13 +46,17 @@ function [H, r, c] = harris(image_path)
 
     imshow(img);
     hold on;
-    radius = 5;
+    radius = 7;
     
     r = [];
     c = [];
+    threshold = 2.0/10000000;
     for x=radius+1:w-radius
         for y=radius+1:h-radius
             ch = H(y, x);
+            if ch < threshold
+                continue
+            end
             is_not_max = false;
             for x_h=x-radius:x+radius
                 for y_h=y-radius:y+radius

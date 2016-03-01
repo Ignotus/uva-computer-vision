@@ -1,6 +1,6 @@
 function tracking()
-    dirName = '/home/ignotus/Development/cv1/assignment-3/pingpong';
-    listing = dir(fullfile(dirName, '*.jpeg'));
+    dirName = '/home/ignotus/Development/cv1/assignment-3/person_toy/';
+    listing = dir(fullfile(dirName, '*.jpg'));
     files = { listing.name };
     
     first_file_path = fullfile(dirName, files{1});
