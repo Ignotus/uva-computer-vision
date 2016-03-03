@@ -1,13 +1,13 @@
 function tracking()
     track_impl('/home/ignotus/Development/cv1/assignment-3/person_toy/', '*.jpg');
-    %%track_impl('/home/ignotus/Development/cv1/assignment-3/pingpong/', '*.jpeg');
+    track_impl('/home/ignotus/Development/cv1/assignment-3/pingpong/', '*.jpeg');
 end
 
 function track_impl(dirName, file_pattern)
     sigma = 3;
-    kernel_length = 11;
-    radius = floor(kernel_length / 2);
+    kernel_length = 30;
     region_radius = 7;
+    threshold = 1.0/6000000000;
     
     listing = dir(fullfile(dirName, file_pattern));
     
@@ -18,6 +18,9 @@ function track_impl(dirName, file_pattern)
     [h, w, d] = size(img);
     
     img = zeros(h, w, length(files));
+    
+    G = gaussian(sigma, kernel_length);
+    Gd = gaussianDer(G, sigma);
 
     % stacks images to form a tensor
     for i=1:numel(files)
@@ -31,11 +34,7 @@ function track_impl(dirName, file_pattern)
         rgb(:,:,:,i) = im2double(imread(fullfile(dirName, files{i})));
     end
     
-    
-    G = gaussian(sigma, kernel_length);
-    Gd = gaussianDer(G, sigma);
-    
-    [~, r, c] = harris(first_file_path);
+    [~, r, c] = harris(first_file_path, kernel_length, sigma, threshold);
     
     fid = figure;
     writerObj = VideoWriter('out.avi');
@@ -46,19 +45,8 @@ function track_impl(dirName, file_pattern)
     for i=1:numel(files)-1
         % Computes derivatives
         Id = zeros(h, w, 3);
-        %% Convolves horizontally
-        for x=radius+1:w-radius
-            for y=1:h
-                Id(y, x, 1) = sum(Gd' .* img(y, x-radius:x+radius, i));
-            end
-        end
-
-        %% Convolves vertically
-        for x=1:w
-            for y=radius+1:h-radius
-                Id(y, x, 2) = sum(Gd .* img(y-radius:y+radius, x, i));
-            end
-        end
+        Id(:,:,1) = conv2(img(:,:,i), Gd, 'same');
+        Id(:,:,2) = conv2(img(:,:,i), Gd', 'same');
 
         Id(:,:,3) = img(:,:,i + 1) - img(:,:,i);
         
@@ -71,8 +59,8 @@ function track_impl(dirName, file_pattern)
         v = zeros(length(r), 2);
         % for each corner point
         for j=1:length(r)
-            corner_x = r(j);
-            corner_y = c(j);
+            corner_x = c(j);
+            corner_y = r(j);
             
             % computes a region boundary
             begin_x = max(1, corner_x - region_radius);
@@ -97,10 +85,10 @@ function track_impl(dirName, file_pattern)
         end
         
         %% Updating corner points estimation
-        r = int16(double(r) + v(:,1)');
-        c = int16(double(c) + v(:,2)');
+        r = int16(double(r) + v(:,2));
+        c = int16(double(c) + v(:,1));
         
-        plot(r, c, 'b^');
+        plot(c, r, 'b^');
         frame = getframe(gcf);
         writeVideo(writerObj, frame);
         hold off

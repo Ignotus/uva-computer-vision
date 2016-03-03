@@ -1,80 +1,69 @@
-function [H, r, c] = harris(image_path)
+function [H, r, c] = harris(image_path, ker_len, sigma, threshold)
     img = im2double(imread(image_path));
-    
-    kernel_length = 11;
-    radius = floor(kernel_length / 2);
-    sigma = 3;
-    G = gaussian(sigma, kernel_length);
-    Gd = gaussianDer(G, sigma);
-    
-    [h, w, d] = size(img);
-    Ix = zeros(h, w, d);
-    for x=radius+1:w-radius
-        for y=1:h
-            for z=1:d
-                Ix(y, x, z) = sum(Gd' .* img(y, x-radius:x+radius, z));
-            end
-        end
-    end
-    
-    Iy = zeros(h, w, d);
-    for x=1:w
-        for y=radius+1:h-radius
-            for z=1:d
-                Iy(y, x, z) = sum(Gd .* img(y-radius:y+radius, x, z));
-            end
-        end
-    end
-    
-    A = zeros(h, w, d);
-    B = zeros(h, w, d);
-    C = zeros(h, w, d);
-    G = G * G';
-    
-    Ix2 = Ix .^ 2;
-    IxIy = Ix .* Iy;
-    Iy2 = Iy .^ 2;
-    
-    for z=1:d
-        A(:,:,z) = conv2(Ix2(:,:,z), G, 'same');
-        B(:,:,z) = conv2(IxIy(:,:,z), G, 'same');
-        C(:,:,z) = conv2(Iy2(:,:,z), G, 'same');
-    end
-    
-    H = (A .* C - B .^2) - 0.04 * (A + C).^2;
-    H = sum(H, 3);
+    imgcalc = im2double(rgb2gray(imread(image_path)));
 
+
+    % calculate the derivative of each pixel in the x and y direction
+    % Do this by convolving with a gaussian filter
+
+    % calculate gaussian derivative Kernel
+    G = gaussian(sigma, ker_len);
+    Gd = gaussianDer(G,sigma);
+
+    % Convolve it with the image to find derivatives
+    [n,m] = size(img(:,:,1));
+    Derivatives = zeros(n,m,2);
+
+    % Note this can also be done in grayscale. Yields similar results.
+    % x direction for all color channels
+    Derivatives(:,:,1) = conv2(imgcalc, Gd ,'same');
+    Derivatives(:,:,2) = conv2(imgcalc, Gd' ,'same');
+
+    % Calculate A, B and C
+    A = conv2(G,G', Derivatives(:,: ,1) .^2, 'same');
+    B = conv2(G,G', Derivatives(:,: ,2) .* Derivatives(:,: ,1), 'same');
+    C = conv2(G,G',Derivatives(:,: ,2) .^2, 'same');
+
+    % Determine the H Matrix
+    H = (A.*C - B.^2) -0.04*(A + C).^2;
+
+    % harris corner detection (using fancy matlab function for regional optima finder)
+    % Also check for threshold value
+    window = 25;
+    mask = ones(window);
+    mask(ceil((window^2)/2)) = 0;
+
+    Filtered = ordfilt2(H, (window^2) -1, mask);
+    Maxima = (H > Filtered) & (H > threshold);
+
+    % Removing the corners found in the 'corners' of the picture
+    Maxima(1:window,1:window) = 0;
+    Maxima(end - window:end,1:window) = 0;
+    Maxima(1:window,end - window:end) = 0;
+    Maxima(end - window:end,end - window:end) = 0;
+
+    % Find non zero values in maximum matrix
+    [r,c] = find(Maxima);
+
+
+    % --------- PLOT -----------
+    figure;
+    subplot(2,2,1);
     imshow(img);
-    hold on;
-    radius = 7;
-    
-    r = [];
-    c = [];
-    threshold = 2.0/10000000;
-    for x=radius+1:w-radius
-        for y=radius+1:h-radius
-            ch = H(y, x);
-            if ch < threshold
-                continue
-            end
-            is_not_max = false;
-            for x_h=x-radius:x+radius
-                for y_h=y-radius:y+radius
-                    if H(y_h, x_h) > ch
-                        is_not_max = true;
-                        break
-                    end
-                end
-                if is_not_max
-                    break
-                end
-            end
-            
-            if is_not_max == false
-                c = [c y];
-                r = [r x];
-                plot(x, y, 'go');
-            end
-        end
-    end
+    hold on ;
+    plot(c,r, 'bo');
+    title('Corners');
+
+    subplot(2,2,2);
+    imshow(100 * Derivatives(:,: ,1));
+    title('Derivatives in the X direction');
+
+
+    subplot(2,2,3);
+    imshow(100 * Derivatives(:,: ,2));
+    title('Derivatives in the Y direction');
+
+    subplot(2,2,4);
+    imshow(img);
+    title('Original Image');
 end
