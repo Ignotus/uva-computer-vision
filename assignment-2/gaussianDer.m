@@ -5,7 +5,7 @@ function [imOut, Gd] = gaussianDer(image_path, G, sigma)
     Gd = zeros(w, 1);
     radius = floor(w / 2);
     for x=1:w
-        Gd(x, 1) = - (radius + 1 - x) / (sigma^2) * G(x, 1);
+        Gd(x, 1) = - (x - radius - 1) / (sigma^2) * G(x, 1);
     end
     
     [h, w, d] = size(img);
