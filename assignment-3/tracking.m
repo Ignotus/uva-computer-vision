@@ -1,13 +1,13 @@
 function tracking()
     track_impl('/home/ignotus/Development/cv1/assignment-3/person_toy/', '*.jpg');
-    track_impl('/home/ignotus/Development/cv1/assignment-3/pingpong/', '*.jpeg');
+    %track_impl('/home/ignotus/Development/cv1/assignment-3/pingpong/', '*.jpeg');
 end
 
 function track_impl(dirName, file_pattern)
-    sigma = 3;
-    kernel_length = 30;
+    sigma = 5;
+    kernel_length = 100;
     region_radius = 7;
-    threshold = 1.0/6000000000;
+    threshold = 1.0/1000000000;
     
     listing = dir(fullfile(dirName, file_pattern));
     
