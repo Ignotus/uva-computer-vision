@@ -1,17 +1,18 @@
-function tracking(dirName, file_pattern)
+function tracking(dir_name, file_pattern, output_file)
     sigma = 5;
     kernel_length = 100;
     region_radius = 7;
     threshold = 1.0/1000000000;
     
-    listing = dir(fullfile(dirName, file_pattern));
+    listing = dir(fullfile(dir_name, file_pattern));
     
     files = { listing.name };
     
-    first_file_path = fullfile(dirName, files{1});
+    first_file_path = fullfile(dir_name, files{1});
     img = im2double(imread(first_file_path));
     [h, w, d] = size(img);
     
+    % Stacking all images together
     img = zeros(h, w, length(files));
     
     G = gaussian(sigma, kernel_length);
@@ -20,19 +21,19 @@ function tracking(dirName, file_pattern)
     % stacks images to form a tensor
     for i=1:numel(files)
         % summing the 3rd axis up to compute intensity
-        img(:,:,i) = sum(im2double(imread(fullfile(dirName, files{i}))), 3);
+        img(:,:,i) = sum(im2double(imread(fullfile(dir_name, files{i}))), 3);
     end
     
     rgb = zeros(h, w, d, length(files));
     % stacks original rgb images
     for i=1:numel(files)
-        rgb(:,:,:,i) = im2double(imread(fullfile(dirName, files{i})));
+        rgb(:,:,:,i) = im2double(imread(fullfile(dir_name, files{i})));
     end
     
     [~, r, c] = harris(first_file_path, kernel_length, sigma, threshold);
     
     fid = figure;
-    writerObj = VideoWriter('out.avi');
+    writerObj = VideoWriter(output_file);
     writerObj.FrameRate = 15;
     open(writerObj); 
     
