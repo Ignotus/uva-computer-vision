@@ -1,7 +1,7 @@
 function tracking(dir_name, file_pattern, output_file)
     sigma = 5;
-    kernel_length = 100;
-    region_radius = 7;
+    kernel_length = 131;
+    region_radius = 12;
     threshold = 1.0/1000000000;
     
     listing = dir(fullfile(dir_name, file_pattern));
@@ -30,7 +30,9 @@ function tracking(dir_name, file_pattern, output_file)
         rgb(:,:,:,i) = im2double(imread(fullfile(dir_name, files{i})));
     end
     
-    [~, r, c] = harris(first_file_path, kernel_length, sigma, threshold);
+    harris_kernel_length = 15;
+    harris_sigma = 5;
+    [~, r, c] = harris(first_file_path, harris_kernel_length, harris_sigma, threshold);
     
     fid = figure;
     writerObj = VideoWriter(output_file);
