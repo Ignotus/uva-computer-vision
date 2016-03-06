@@ -77,7 +77,7 @@ function tracking(dir_name, file_pattern, output_file)
                 end
             end
             
-            v(j,:) = linsolve(A' * A, A' * b);
+            [v(j,:), ~] = linsolve(A' * A, A' * b);
         end
         
         %% Updating corner points estimation
