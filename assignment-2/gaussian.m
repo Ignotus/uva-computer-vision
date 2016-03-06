@@ -1,4 +1,4 @@
-gfunction G = gaussian(sigma, kernelLength)
+function G = gaussian(sigma, kernelLength)
     radius = floor(kernelLength / 2);
     G = zeros(kernelLength, 1);
     coef = 1 / (sigma * sqrt(2 * pi));
