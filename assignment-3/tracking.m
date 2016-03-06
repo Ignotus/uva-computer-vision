@@ -1,9 +1,4 @@
-function tracking()
-    track_impl('/home/ignotus/Development/cv1/assignment-3/person_toy/', '*.jpg');
-    %track_impl('/home/ignotus/Development/cv1/assignment-3/pingpong/', '*.jpeg');
-end
-
-function track_impl(dirName, file_pattern)
+function tracking(dirName, file_pattern)
     sigma = 5;
     kernel_length = 100;
     region_radius = 7;
