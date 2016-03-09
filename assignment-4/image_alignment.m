@@ -57,7 +57,9 @@ function image_alignment()
     y = reshape(y.', 1, []);
     x = reshape(x.', 1, []);
     
-    xy_ = uint16([x;y]' * M_max' + repmat(T_max', [length(x), 1])) + 1;
+    xy_ = uint16(ceil([x;y]' * M_max' + repmat(T_max', [length(x), 1])));
+    % A hack to plot an image. Coordinates cannot be negative values
+    xy_ = xy_ - min(xy_, 2) + 1;
     im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
     size(im3)
     size(xy_)
