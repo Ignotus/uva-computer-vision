@@ -1,9 +1,18 @@
-function image_alignment()
+function image_alignment(image1_path, image2_path, stitch)
     P = 3;
     N = 10;
 
-    im1 = single(imread('boat/img1.pgm'));
-    im2 = single(imread('boat/img2.pgm'));
+    im1 = imread(image1_path);
+    im2 = imread(image2_path);
+    if length(size(im1)) == 3
+        im1 = rgb2gray(im1);
+    end
+    
+    if length(size(im2)) == 3
+        im2 = rgb2gray(im2);
+    end
+    im1 = single(im1);
+    im2 = single(im2);
     [frames1, desc1] = vl_sift(im1);
     [frames2, desc2] = vl_sift(im2);
     
@@ -59,28 +68,47 @@ function image_alignment()
     
     xy_ = uint16(ceil([x;y]' * M_max' + repmat(T_max', [length(x), 1])));
     % A hack to plot an image. Coordinates cannot be negative values
-    xy_ = xy_ - min(xy_, 2) + 1;
-    im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
-    size(im3)
-    size(xy_)
     
-    for i=1:length(xy_)
-        im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
+    % Shift of the first image from the second
+    shift = - min(xy_) + 1;
+    if stitch == false
+        xy_ = xy_ + repmat(shift, [length(xy_), 1]);
+        im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
+
+        for i=1:length(xy_)
+            im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
+        end
+
+        figure;
+        imshowpair(im3, im2, 'montage')
+
+        Tr = zeros(3, 3);
+        Tr(1:2, 1:2) = M_max';
+        Tr(3, 3) = 1;   
+
+        Tr = maketform('affine', Tr);
+        tformfwd(T_max, Tr);
+        im4 = imtransform(im1, Tr);
+
+        figure;
+        imshowpair(im4, im2, 'montage')
+    else % Stitch
+        % Shifting the first image
+        xy_ = xy_ + repmat(shift, [length(xy_), 1]);
+        im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
+
+        for i=1:length(xy_)
+            im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
+        end
+        
+        % Shifting the second image
+        [h, w] = size(im2);
+        im4 = zeros(h + shift(2), w + shift(1));
+        im4(shift(2) + 1:end,shift(1) + 1:end) = im2;
+        
+        figure;
+        imshowpair(im3, im4);
     end
-    
-    figure;
-    image(im3);
-    
-    Tr = zeros(3, 3);
-    Tr(1:2, 1:2) = M_max';
-    Tr(3, 3) = 1;   
-    
-    Tr = maketform('affine', Tr);
-    tformfwd(T_max, Tr);
-    im3 = imtransform(im1, Tr);
-    
-    figure;
-    imshowpair(im3, im2, 'montage')
 end
 
 
