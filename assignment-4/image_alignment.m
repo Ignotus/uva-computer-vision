@@ -94,6 +94,14 @@ function image_alignment(image1_path, image2_path)
         im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
     end
     
+    % Nearest neighbor interpolation
+    for i=2:h-1
+        for j=2:w-1
+            values = [im3(i-1,j-1:j+1) im3(i+1,j-1:j+1) im3(i, j-1) im3(i, j+1)];
+            im3(i, j) = mean(values);
+        end
+    end
+    
     %% ALIGNING
     figure;
     imshowpair(im3, im2, 'montage')
@@ -108,6 +116,7 @@ function image_alignment(image1_path, image2_path)
 
     figure;
     imshowpair(im5, im2, 'montage')
+    title('With maketform, imtransform');
         
     %% STITCHING
     figure;
