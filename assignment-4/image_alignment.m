@@ -1,4 +1,4 @@
-function image_alignment(image1_path, image2_path, stitch)
+function image_alignment(image1_path, image2_path)
     P = 3;
     N = 10;
 
@@ -11,8 +11,8 @@ function image_alignment(image1_path, image2_path, stitch)
     if length(size(im2)) == 3
         im2 = rgb2gray(im2);
     end
-    im1 = single(im1);
-    im2 = single(im2);
+    im1 = im2single(im1);
+    im2 = im2single(im2);
     [frames1, desc1] = vl_sift(im1);
     [frames2, desc2] = vl_sift(im2);
     
@@ -66,49 +66,68 @@ function image_alignment(image1_path, image2_path, stitch)
     y = reshape(y.', 1, []);
     x = reshape(x.', 1, []);
     
-    xy_ = uint16(ceil([x;y]' * M_max' + repmat(T_max', [length(x), 1])));
-    % A hack to plot an image. Coordinates cannot be negative values
+    xy_ = int16(ceil([x;y]' * M_max' + repmat(T_max', [length(x), 1])));
     
-    % Shift of the first image from the second
-    shift = - min(xy_) + 1;
-    if stitch == false
-        xy_ = xy_ + repmat(shift, [length(xy_), 1]);
-        im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
+    x = x';
+    y = y';
+    
+    % A hack to plot an image. Coordinates cannot be negative values
+    min_xy_ = min(xy_);
+    max_xy_ = max(xy_);
+    
+    [h, w] = size(im2);
+    min_xy = min([min_xy_; 1 1]);
+    
+    max_xy = max([max_xy_; w h]);
+    % Shift
+    shift = 1 - min_xy;
+    
+    w = max_xy(1) - min_xy(1) + 1;
+    h = max_xy(2) - min_xy(2) + 1;
+    
+    % Shifting the first image
+    xy_ = xy_ + repmat(shift, [length(xy_), 1]);
+    
+    im3 = zeros(h, w);
 
-        for i=1:length(xy_)
-            im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
-        end
-
-        figure;
-        imshowpair(im3, im2, 'montage')
-
-        Tr = zeros(3, 3);
-        Tr(1:2, 1:2) = M_max';
-        Tr(3, 3) = 1;   
-
-        Tr = maketform('affine', Tr);
-        tformfwd(T_max, Tr);
-        im4 = imtransform(im1, Tr);
-
-        figure;
-        imshowpair(im4, im2, 'montage')
-    else % Stitch
-        % Shifting the first image
-        xy_ = xy_ + repmat(shift, [length(xy_), 1]);
-        im3 = zeros(max(xy_(2,:)), max(xy_(1,:)));
-
-        for i=1:length(xy_)
-            im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
-        end
-        
-        % Shifting the second image
-        [h, w] = size(im2);
-        im4 = zeros(h + shift(2), w + shift(1));
-        im4(shift(2) + 1:end,shift(1) + 1:end) = im2;
-        
-        figure;
-        imshowpair(im3, im4);
+    for i=1:length(xy_)
+        im3(xy_(i, 2), xy_(i, 1)) = im1(y(i), x(i));
     end
+    
+    %% ALIGNING
+    figure;
+    imshowpair(im3, im2, 'montage')
+
+    Tr = zeros(3, 3);
+    Tr(1:2, 1:2) = M_max';
+    Tr(3, 3) = 1;   
+
+    Tr = maketform('affine', Tr);
+    tformfwd(T_max, Tr);
+    im5 = imtransform(im1, Tr);
+
+    figure;
+    imshowpair(im5, im2, 'montage')
+        
+    %% STITCHING
+    figure;
+    subplot(2, 2, 1);
+    imshow(im3);
+        
+    % Shifting the second image
+        
+    im4 = zeros(h, w);
+    [im2_h, im2_w] = size(im2);
+    im4(shift(2) + 1:shift(2) + im2_h,shift(1) + 1:shift(1)+ im2_w) = im2;
+        
+    subplot(2, 2, 2);
+    imshow(im4);
+
+    subplot(2, 2, 3);
+    imshowpair(im3, im4);
+        
+    im3(shift(2) + 1:shift(2) + im2_h,shift(1) + 1:shift(1)+ im2_w) = im2;
+        
+    subplot(2, 2, 4);
+    imshow(im3);
 end
-
-
