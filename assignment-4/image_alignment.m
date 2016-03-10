@@ -142,7 +142,7 @@ function image_alignment(image1_path, image2_path)
     imshow(im3);
 end
 
-function plot_sift(matches, img1, img2, frames1, frames2)
+function plot_sift(matches, im1, im2, frames1, frames2)
     % get a random sample
     r = randperm(size(matches,2),50);
 
@@ -155,6 +155,16 @@ function plot_sift(matches, img1, img2, frames1, frames2)
     % http://www.vlfeat.org/overview/sift.html
 
     % concatenate the figures
+    
+    h1 = size(im1, 1);
+    h2 = size(im2, 1);
+    h = max(h1, h2);
+    img1 = zeros(h, size(im1, 2));
+    img2 = zeros(h, size(im2, 2));
+    
+    img1(1:size(im1, 1),1:size(im1, 2)) = im1;
+    img2(1:size(im2, 1),1:size(im2, 2)) = im2;
+        
     concatenated_figure = cat(2,img1,img2);
 
     % rescale the x-coordinates for second figure
