@@ -32,6 +32,12 @@ function main()
         load('./Caltech4/FeatureData/kmeans_centroids.mat');
     end
     
-    labels = extract_labels(train_files);
-    histograms = quantize_files(train_files, centroids, type, kp_or_dense);
+    if exist('./Caltech4/FeatureData/kmeans_centroids.mat', 'file') == 0
+        labels = extract_labels(train_files);
+        histograms = quantize_files(train_files, centroids, type, kp_or_dense);
+
+        save('./Caltech4/FeatureData/histograms.mat', 'histograms', 'labels');
+    else
+        load('./Caltech4/FeatureData/histograms.mat');
+    end
 end
