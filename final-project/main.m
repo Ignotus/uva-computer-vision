@@ -18,11 +18,20 @@ function main()
     %% Shuffle files
     train_files = train_files(randperm(length(train_files)));
     %% Taking first nimages_cluseting images for clustering
-    train_files = train_files(1:nimages);
+    train_files_for_clustering = train_files(1:nimages);
 
-    stacked_features = double(stack_descriptors(train_files, type, kp_or_dense));
+    stacked_features = double(stack_descriptors(train_files_for_clustering , type, kp_or_dense));
     size(stacked_features)
     
-    [centroids, ~] = k_means(stacked_features, num_centroids);
-    save('./Caltech4/FeatureData/kmeans_centroids.mat', 'centroids');
+    if exist('./Caltech4/FeatureData/kmeans_centroids.mat', 'file') == 0
+        display('Computing centroids');
+        [centroids, ~] = k_means(stacked_features, num_centroids);
+        save('./Caltech4/FeatureData/kmeans_centroids.mat', 'centroids');
+    else
+        display('Loading centroids');
+        load('./Caltech4/FeatureData/kmeans_centroids.mat');
+    end
+    
+    histograms = quantize_files(train_files, centroids, type, kp_or_dense);
+    size(histograms)
 end
