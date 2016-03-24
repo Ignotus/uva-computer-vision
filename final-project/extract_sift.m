@@ -9,11 +9,11 @@ function extract_sift(type, kp_or_dense)
     mkdir('./Caltech4/FeatureData', 'faces_test');
     mkdir('./Caltech4/FeatureData', 'motorbikes_test');
     
-    extract_features('./Caltech4/ImageSets/train.txt');
-    extract_features('./Caltech4/ImageSets/test.txt');
+    extract_features(type, kp_or_dense, './Caltech4/ImageSets/train.txt');
+    extract_features(type, kp_or_dense, './Caltech4/ImageSets/test.txt');
 end
 
-function extract_features(file)
+function extract_features(type, kp_or_dense, file)
     fid = fopen(file);
     tline = fgetl(fid);
     while ischar(tline)
