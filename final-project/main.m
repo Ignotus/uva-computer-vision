@@ -32,6 +32,6 @@ function main()
         load('./Caltech4/FeatureData/kmeans_centroids.mat');
     end
     
+    labels = extract_labels(train_files);
     histograms = quantize_files(train_files, centroids, type, kp_or_dense);
-    size(histograms)
 end
