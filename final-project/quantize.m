@@ -19,10 +19,4 @@ h = histogram(index, size(centroids,2), 'Normalization', 'probability');
 
 end
 
-% Function to normalize the features
-function norm_matrix = normalize(mat)
 
-    colNorms = sqrt(sum(mat.^2, 1));
-    norm_matrix = bsxfun(@rdivide, mat,colNorms);
-
-end
