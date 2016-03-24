@@ -32,7 +32,7 @@ function main()
         load('./Caltech4/FeatureData/kmeans_centroids.mat');
     end
     
-    if exist('./Caltech4/FeatureData/kmeans_centroids.mat', 'file') == 0
+    if exist('./Caltech4/FeatureData/histograms.mat', 'file') == 0
         labels = extract_labels(train_files);
         histograms = quantize_files(train_files, centroids, type, kp_or_dense);
 
@@ -41,8 +41,14 @@ function main()
         load('./Caltech4/FeatureData/histograms.mat');
     end
     
+    size(labels)
+    size(histograms)
+    
+    labels
+    [svm1, svm2, svm3, svm4] = train_SVMs(labels', histograms');
+    
     %% Testing
-    test_files = file_list('./Caltech4/ImageSets/test.txt');
-    test_labels = extract_labels(test_files);
-    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
+    %test_files = file_list('./Caltech4/ImageSets/test.txt');
+    %test_labels = extract_labels(test_files);
+    %test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
 end
