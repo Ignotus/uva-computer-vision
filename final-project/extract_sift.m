@@ -27,10 +27,9 @@ function extract_features(file)
         %file_name = folder(2)
         %folder = folder(1)
         %[class, ~] = strsplit(folder, '_');
-        features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
         output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat')
-        
         if exist(output_file{1}, 'file') == 0
+            features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
             save(output_file{1}, 'features');
         end
     end

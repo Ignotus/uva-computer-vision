@@ -5,5 +5,4 @@
 function main()
     extract_sift();
     
-
 end
