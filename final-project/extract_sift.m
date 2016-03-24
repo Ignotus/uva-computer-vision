@@ -12,15 +12,20 @@ function extract_sift()
     mkdir('./Caltech4/FeatureData', 'cars_test');
     mkdir('./Caltech4/FeatureData', 'faces_test');
     mkdir('./Caltech4/FeatureData', 'motorbikes_test');
+    
+    extract_features('./Caltech4/ImageSets/train.txt');
+    extract_features('./Caltech4/ImageSets/test.txt');
+end
 
-    fid = fopen('./Caltech4/ImageSets/train.txt');
+function extract_features(file)
+    fid = fopen(file);
     tline = fgetl(fid);
     while ischar(tline)
         %disp(tline)
         tline = fgetl(fid);
         folder = strsplit(tline, '/');
-        file_name = folder(2)
-        folder = folder(1)
+        %file_name = folder(2)
+        %folder = folder(1)
         %[class, ~] = strsplit(folder, '_');
         features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
         output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat')
@@ -31,4 +36,3 @@ function extract_sift()
     end
     fclose(fid);
 end
-
