@@ -1,4 +1,4 @@
-function extract_sift()
+function extract_sift(type, kp_or_dense)
     %% Experiment parameters
     type = 'gray';
     kp_or_dense = 'kp';
@@ -22,13 +22,18 @@ function extract_features(file)
     tline = fgetl(fid);
     while ischar(tline)
         %disp(tline)
-        tline = fgetl(fid);
+        tline = fgetl(fid)
         folder = strsplit(tline, '/');
+<<<<<<< Updated upstream
         %file_name = folder(2)
         %folder = folder(1)
+=======
+        file_name = folder(2);
+        folder = folder(1);
+>>>>>>> Stashed changes
         %[class, ~] = strsplit(folder, '_');
         features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
-        output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat')
+        output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat');
         
         if exist(output_file{1}, 'file') == 0
             save(output_file{1}, 'features');
