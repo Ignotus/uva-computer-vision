@@ -4,12 +4,12 @@
 
 function main()
     %% Experiment parameters
-    type = 'gray';
+    type = 'RGB';
     kp_or_dense = 'kp';
     %% number of images for clustering
-    nimages = 600;
+    nimages = 1;
     
-    num_centroids = 800;
+    num_centroids = 400;
 
     extract_sift(type, kp_or_dense);
     

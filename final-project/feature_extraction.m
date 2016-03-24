@@ -48,8 +48,8 @@ end
 
 function desc = RGBSIFT(path, kp_or_dense)
     im = im2single(imread(path));
-    
-    if strcmp(kp_or_dense, 'kp')
+
+    if strcmp(kp_or_dense, 'kp') && (size(im,3) > 2)
         [feat, red] = vl_sift(im(:,:,1));
         [feat, green] = vl_sift(im(:,:,2));
         [feat, blue] = vl_sift(im(:,:,3));
@@ -57,13 +57,15 @@ function desc = RGBSIFT(path, kp_or_dense)
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
           
-    elseif strcmp(kp_or_dense, 'dense')
+    elseif strcmp(kp_or_dense, 'dense') && size(im,3) > 2
         [feat, red] = vl_dsift(im(:,:,1));
         [feat, green] = vl_dsift(im(:,:,2));
         [feat, blue] = vl_dsift(im(:,:,3));
         
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
+    else
+        [feat, desc] = vl_sift(im);
        
     end 
 
@@ -72,7 +74,7 @@ end
 function feat = rgbSIFT(path, kp_or_dense)
     im = im2single(normalized_rgb(imread(path)));
     
-    if strcmp(kp_or_dense, 'kp')
+    if strcmp(kp_or_dense, 'kp') && size(im,3) > 2
         [feat, red] = vl_sift(im(:,:,1));
         [feat, green] = vl_sift(im(:,:,2));
         [feat, blue] = vl_sift(im(:,:,3));
@@ -80,13 +82,15 @@ function feat = rgbSIFT(path, kp_or_dense)
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
           
-    elseif strcmp(kp_or_dense, 'dense')
+    elseif strcmp(kp_or_dense, 'dense') && size(im,3) > 2
         [feat, red] = vl_dsift(im(:,:,1));
         [feat, green] = vl_dsift(im(:,:,2));
         [feat, blue] = vl_dsift(im(:,:,3));
         
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
+    else 
+        [feat, desc] = vl_sift(im);
        
     end 
     
@@ -96,7 +100,7 @@ function feat = opponentSIFT(path, kp_or_dense)
 
     im = im2single(opponent_colors(double(imread(path))));
     
-    if strcmp(kp_or_dense, 'kp')
+    if strcmp(kp_or_dense, 'kp') && size(im,3) > 2
         [feat, red] = vl_sift(im(:,:,1));
         [feat, green] = vl_sift(im(:,:,2));
         [feat, blue] = vl_sift(im(:,:,3));
@@ -104,13 +108,16 @@ function feat = opponentSIFT(path, kp_or_dense)
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
           
-    elseif strcmp(kp_or_dense, 'dense')
+    elseif strcmp(kp_or_dense, 'dense') && size(im) > 2
         [feat, red] = vl_dsift(im(:,:,1));
         [feat, green] = vl_dsift(im(:,:,2));
         [feat, blue] = vl_dsift(im(:,:,3));
         
         RG = cat(2, red, green);
         desc = cat(2, RG, blue);
+    else
+        [feat, desc] = vl_sift(im);
+        
        
     end 
     figure
