@@ -41,7 +41,6 @@ function main()
         load('./Caltech4/FeatureData/histograms.mat');
     end
 
-    
     [svm1, svm2, svm3, svm4] = train_SVMs(labels', histograms');
     
     %% Testing

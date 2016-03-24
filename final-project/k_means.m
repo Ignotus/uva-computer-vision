@@ -7,13 +7,12 @@ function [centroids, assignments] = k_means(descriptor_vector, num_centroids)
 normalized_descriptors = normalize(descriptor_vector);
 
 % Run K-Means
-[centroids, assignments]=vl_kmeans(normalized_descriptors, num_centroids);
+[centroids, assignments] = vl_kmeans(normalized_descriptors, num_centroids);
 
 end
 
 % Function to normalize the features
 function norm_matrix = normalize(mat)
-
     colNorms = sqrt(sum(mat.^2, 1));
     norm_matrix = bsxfun(@rdivide, mat,colNorms);
 

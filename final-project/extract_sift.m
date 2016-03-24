@@ -1,13 +1,13 @@
 function extract_sift(type, kp_or_dense)
-    mkdir('./Caltech4/FeatureData', 'airplanes_train');
-    mkdir('./Caltech4/FeatureData', 'cars_train');
-    mkdir('./Caltech4/FeatureData', 'faces_train');
-    mkdir('./Caltech4/FeatureData', 'motorbikes_train');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'airplanes_train');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'cars_train');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'faces_train');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'motorbikes_train');
     
-    mkdir('./Caltech4/FeatureData', 'airplanes_test');
-    mkdir('./Caltech4/FeatureData', 'cars_test');
-    mkdir('./Caltech4/FeatureData', 'faces_test');
-    mkdir('./Caltech4/FeatureData', 'motorbikes_test');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'airplanes_test');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'cars_test');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'faces_test');
+    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'motorbikes_test');
     
     extract_features(type, kp_or_dense, './Caltech4/ImageSets/train.txt');
     extract_features(type, kp_or_dense, './Caltech4/ImageSets/test.txt');
