@@ -34,7 +34,6 @@ function desc = GrayscaleSIFT(path, kp_or_dense)
         
     end 
    
-    
 end
 
 % TODO: Check if this is the correct implementation of RGB sift, just
