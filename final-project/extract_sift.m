@@ -14,20 +14,16 @@ function extract_sift(type, kp_or_dense)
 end
 
 function extract_features(type, kp_or_dense, file)
-    fid = fopen(file);
-    tline = fgetl(fid);
-    while ischar(tline)
-        folder = strsplit(tline, '/');
+    for tline=file_list(file)
+        folder = strsplit(tline{1}, '/');
 
         file_name = folder(2);
         folder = folder(1);
 
         output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat')
         if exist(output_file{1}, 'file') == 0
-            features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
+            features = feature_extraction(strcat('./Caltech4/ImageData/', tline{1}, '.jpg'), type, kp_or_dense);
             save(output_file{1}, 'features');
         end
-        tline = fgetl(fid);
     end
-    fclose(fid);
 end
