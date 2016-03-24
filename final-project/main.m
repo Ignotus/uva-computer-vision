@@ -41,14 +41,11 @@ function main()
         load('./Caltech4/FeatureData/histograms.mat');
     end
     
-    size(labels)
-    size(histograms)
-    
-    labels
+    %labels
     [svm1, svm2, svm3, svm4] = train_SVMs(labels', histograms');
     
     %% Testing
-    %test_files = file_list('./Caltech4/ImageSets/test.txt');
-    %test_labels = extract_labels(test_files);
-    %test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
+    test_files = file_list('./Caltech4/ImageSets/test.txt');
+    test_labels = extract_labels(test_files);
+    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
 end
