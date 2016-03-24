@@ -25,7 +25,9 @@ function extract_sift()
         features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
         output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat')
         
-        save(output_file{1}, 'features');
+        if exist(output_file{1}, 'file') == 0
+            save(output_file{1}, 'features');
+        end
     end
     fclose(fid);
 end
