@@ -40,4 +40,9 @@ function main()
     else
         load('./Caltech4/FeatureData/histograms.mat');
     end
+    
+    %% Testing
+    test_files = file_list('./Caltech4/ImageSets/test.txt');
+    test_labels = extract_labels(test_files);
+    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
 end
