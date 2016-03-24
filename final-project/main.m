@@ -8,7 +8,10 @@ function main()
     kp_or_dense = 'kp';
     %% number of images for clustering
     nimages = 10;
-    %extract_sift(type, kp_or_dense);
+    
+    num_centroids = 200;
+
+    extract_sift(type, kp_or_dense);
     
     train_files = file_list('./Caltech4/ImageSets/train.txt');
     
@@ -17,6 +20,9 @@ function main()
     %% Taking first nimages_cluseting images for clustering
     train_files = train_files(1:nimages);
 
-    stacked_features = stack_descriptors(train_files, type, kp_or_dense);
+    stacked_features = double(stack_descriptors(train_files, type, kp_or_dense));
     size(stacked_features)
+    
+    [centroids, ~] = k_means(stacked_features, num_centroids);
+    save('./Caltech4/FeatureData/kmeans_centroids.mat', 'centroids');
 end
