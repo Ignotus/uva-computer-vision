@@ -9,13 +9,15 @@ function [svm1, svm2, svm3, svm4] = train_SVMs(target, data)
     
     % Train the second SVM
     target_2 = target;
-    target_2(target_2 > 2 || target_2 < 2) = 0;
+    target_2(target_2 > 2 ) = 0;
+    target_2(target_2 < 2) = 0;
     target_2(target_2 == 2) = 1;
     svm2 = svmtrain(target_2, data, '-t 0');
     
     % Train the third SVM
     target_3 = target;
-    target_3(target_3 > 3 || target_3 < 3) = 0;
+    target_3(target_3 > 3) = 0;
+    target_3(target_3 < 3) = 0;
     target_3(target_3 == 3) = 1;
     svm3 = svmtrain(target_3, data, '-t 0');
     
