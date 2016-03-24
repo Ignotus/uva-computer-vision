@@ -7,9 +7,9 @@ function main()
     type = 'gray';
     kp_or_dense = 'kp';
     %% number of images for clustering
-    nimages = 10;
+    nimages = 600;
     
-    num_centroids = 200;
+    num_centroids = 800;
 
     extract_sift(type, kp_or_dense);
     
@@ -40,15 +40,13 @@ function main()
     else
         load('./Caltech4/FeatureData/histograms.mat');
     end
+
     
-    size(labels)
-    size(histograms)
-    
-    labels
     [svm1, svm2, svm3, svm4] = train_SVMs(labels', histograms');
     
     %% Testing
-    %test_files = file_list('./Caltech4/ImageSets/test.txt');
-    %test_labels = extract_labels(test_files);
-    %test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
+    test_files = file_list('./Caltech4/ImageSets/test.txt');
+    test_labels = extract_labels(test_files);
+    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense);
+    predict_SVMs(svm1, svm2, svm3, svm4, test_labels,test_histograms);
 end
