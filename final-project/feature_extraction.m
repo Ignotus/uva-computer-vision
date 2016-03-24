@@ -24,7 +24,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function desc = GrayscaleSIFT(path, kp_or_dense)
-    im = im2single(rgb2gray(imread(path)));
+    
+    % Check the size of the image
+    im = imread(path);
+    if size(im, 3) > 2
+        im = im2single(rgb2gray(im));
+    else
+        im = im2single(im)
+    end
     
     if strcmp(kp_or_dense, 'kp')
         [feat, desc] = vl_sift(im);
