@@ -3,6 +3,9 @@
 % Authors: Riaan Zoetmulder & Minh Ngo
 
 function main()
-    extract_sift();
+    %% Experiment parameters
+    type = 'gray';
+    kp_or_dense = 'kp';
+    extract_sift(type, kp_or_dense);
     
 end

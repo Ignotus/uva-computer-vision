@@ -1,8 +1,4 @@
 function extract_sift(type, kp_or_dense)
-    %% Experiment parameters
-    type = 'gray';
-    kp_or_dense = 'kp';
-
     mkdir('./Caltech4/FeatureData', 'airplanes_train');
     mkdir('./Caltech4/FeatureData', 'cars_train');
     mkdir('./Caltech4/FeatureData', 'faces_train');
