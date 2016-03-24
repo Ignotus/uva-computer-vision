@@ -24,13 +24,9 @@ function extract_features(file)
         %disp(tline)
         tline = fgetl(fid)
         folder = strsplit(tline, '/');
-<<<<<<< Updated upstream
-        %file_name = folder(2)
-        %folder = folder(1)
-=======
+
         file_name = folder(2);
         folder = folder(1);
->>>>>>> Stashed changes
         %[class, ~] = strsplit(folder, '_');
         features = feature_extraction(strcat('./Caltech4/ImageData/', tline, '.jpg'), type, kp_or_dense);
         output_file = strcat('./Caltech4/FeatureData/', folder, '/', type, '_', kp_or_dense, '_', file_name, '.mat');
