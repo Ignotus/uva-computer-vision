@@ -15,7 +15,8 @@ for x = 1: size(normalized_data,2)
 end
 
 % return the histogram
-h = histogram(index, size(centroids,2), 'Normalization', 'probability');
+h = hist(index, size(centroids,2), 'Normalization', 'probability');
+h = h./sum(h,2);
 
 end
 

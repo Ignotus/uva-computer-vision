@@ -1,3 +1,4 @@
+
 % Function to normalize the features
 function norm_matrix = normalize(mat)
 
