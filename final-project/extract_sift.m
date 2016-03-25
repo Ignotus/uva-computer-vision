@@ -1,13 +1,9 @@
 function extract_sift(type, kp_or_dense)
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'airplanes_train');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'cars_train');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'faces_train');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'motorbikes_train');
-    
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'airplanes_test');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'cars_test');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'faces_test');
-    [~, ~, ~] = mkdir('./Caltech4/FeatureData', 'motorbikes_test');
+    classes = ['airplanes' 'cars' 'faces' 'motorbikes'];
+    for class=classes
+        [~, ~, ~] = mkdir('./Caltech4/FeatureData', strcat('airplanes', '_train'));
+        [~, ~, ~] = mkdir('./Caltech4/FeatureData', strcat('airplanes', '_test'));
+    end
     
     extract_features(type, kp_or_dense, './Caltech4/ImageSets/train.txt');
     extract_features(type, kp_or_dense, './Caltech4/ImageSets/test.txt');
