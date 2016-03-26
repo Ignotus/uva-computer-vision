@@ -63,7 +63,7 @@ function main()
     train_std = std(train_histograms, 0, 2);
     
     train_histograms = scale(train_histograms, train_mean, train_std);
-    
+
     [svm1, svm2, svm3, svm4] = train_SVMs(train_labels, train_histograms');
     
     %% Computes training accuracy
