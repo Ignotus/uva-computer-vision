@@ -1,9 +1,9 @@
-function stacked_features = stack_descriptors(files, type, kp_or_dense, step_size)
+function stacked_features = stack_descriptors(files, type, kp_or_dense, step_size, bin_size)
     stacked_features = 0;
 
     for file=files
         [folder, file_name] = extract_filemeta(file);
-        output_file = descriptor_file_name(folder, type, kp_or_dense, step_size, file_name);
+        output_file = descriptor_file_name(folder, type, kp_or_dense, step_size, bin_size, file_name);
         
         load(output_file{1});
         if stacked_features == 0

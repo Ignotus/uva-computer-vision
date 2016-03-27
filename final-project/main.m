@@ -14,13 +14,14 @@ function main()
     type = 'RGB';
     kp_or_dense = 'dense';
     %% number of images for clustering
-    nimages = 200;
+    nimages = 400;
     
-    num_centroids = 200;
+    num_centroids = 400;
     
-    step_size = 12;
+    step_size = 8;
+    bin_size = 4;
 
-    extract_sift(type, kp_or_dense, step_size);
+    extract_sift(type, kp_or_dense, step_size, bin_size);
     
     train_files = file_list('./Caltech4/ImageSets/train.txt');
     
@@ -30,6 +31,11 @@ function main()
     [~, ~, ~] = mkdir('./Caltech4/FeatureData', type);
     [~, ~, ~] = mkdir(strcat('./Caltech4/FeatureData/', type), kp_or_dense);
     dump_dir = strcat('./Caltech4/FeatureData/', type, '/', kp_or_dense, '/');
+    if strcmp(kp_or_dense, 'dense') == 1
+        [~, ~, ~] = mkdir(dump_dir, num2str(step_size));
+        [~, ~, ~] = mkdir(strcat(dump_dir, num2str(step_size)), num2str(bin_size));
+        dump_dir = strcat(dump_dir, num2str(step_size), '/', num2str(bin_size), '/');
+    end
     
     centroid_file = strcat(dump_dir, 'kmeans_centroids.mat');
     if exist(centroid_file, 'file') == 0
@@ -37,7 +43,7 @@ function main()
         train_files_for_clustering = train_files(1:nimages);
 
         stacked_features = double(stack_descriptors(train_files_for_clustering,...
-                                                    type, kp_or_dense, step_size));
+                                                    type, kp_or_dense, step_size, bin_size));
     
         display('Computing centroids');
         [centroids, ~] = k_means(stacked_features, num_centroids);
@@ -52,7 +58,7 @@ function main()
     if exist(histogram_file, 'file') == 0
         train_labels = extract_labels(train_files);
         train_histograms = quantize_files(train_files, centroids, type,...
-                                          kp_or_dense, step_size);
+                                          kp_or_dense, step_size, bin_size);
 
         save(histogram_file, 'train_histograms', 'train_labels');
     else
@@ -68,21 +74,21 @@ function main()
     
     %% Computes training accuracy
     display('Computing training accuracy');
-    predict_SVMs(svm1, svm2, svm3, svm4, train_labels, train_histograms');
+    [predicted_class, tp, tn, fp, fn, precision, recall, accuracy, ap, map, ranks] =...
+        predict_SVMs(svm1, svm2, svm3, svm4, train_labels, train_histograms');
 
     %% Testing
     test_files = file_list('./Caltech4/ImageSets/test.txt');
     test_labels = extract_labels(test_files);
-    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense, step_size);
+    test_histograms = quantize_files(test_files, centroids, type, kp_or_dense, step_size, bin_size);
     test_histograms = scale(test_histograms, train_mean, train_std);
     
     display('Computing testing accuracy');
-    [predicted_class, ap, map] = predict_SVMs(svm1, svm2, svm3, svm4,...
-                                                  test_labels, test_histograms');
+    [predicted_class, tp, tn, fp, fn, precision, recall, accuracy, ap, map, ranks] =...
+        predict_SVMs(svm1, svm2, svm3, svm4, test_labels, test_histograms');
     
     correct_predictions = predicted_class == test_labels;
     accuracy = length(predicted_class(correct_predictions)) / length(predicted_class);
     
-    %display('Final accuracy:');
-    accuracy
+    display(sprintf('Final accuracy: %.3f', accuracy));
 end

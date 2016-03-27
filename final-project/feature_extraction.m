@@ -1,22 +1,26 @@
 % Feature extraction
 % Authors: Riaan Zoetmulder & Minh Ngo
 
-function descriptors = feature_extraction(path, type, kp_or_dense, step_size)
+function descriptors = feature_extraction(path, type, kp_or_dense, step_size, bin_size)
     if nargin < 3
         step_size = 8;
     end
+    
+    if nargin < 4
+        bin_size = 3;
+    end
 
     if strcmp(type, 'gray')
-        descriptors = GrayscaleSIFT(path, kp_or_dense, step_size);
+        descriptors = GrayscaleSIFT(path, kp_or_dense, step_size, bin_size);
 
     elseif strcmp(type,'RGB')
-        descriptors = RGBSIFT(path, kp_or_dense, step_size);
+        descriptors = RGBSIFT(path, kp_or_dense, step_size, bin_size);
 
     elseif strcmp(type, 'rgb')
-        descriptors = rgbSIFT(path, kp_or_dense, step_size);
+        descriptors = rgbSIFT(path, kp_or_dense, step_size, bin_size);
 
     elseif strcmp(type, 'opponent')
-        descriptors = opponentSIFT(path, kp_or_dense, step_size);
+        descriptors = opponentSIFT(path, kp_or_dense, step_size, bin_size);
     end
 
 end
@@ -25,7 +29,7 @@ end
 %%%%%%%% SIFT DESCRIPTORS %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function desc = GrayscaleSIFT(path, kp_or_dense, step_size)
+function desc = GrayscaleSIFT(path, kp_or_dense, step_size, bin_size)
     
     % Check the size of the image
     im = imread(path);
@@ -39,13 +43,13 @@ function desc = GrayscaleSIFT(path, kp_or_dense, step_size)
         [~, desc] = vl_sift(im);
           
     elseif strcmp(kp_or_dense, 'dense')
-        [~, desc] = vl_dsift(im, 'step', step_size);
+        [~, desc] = vl_dsift(im, 'step', step_size, 'size', bin_size);
         
     end 
    
 end
 
-function desc = channel_sift(im, kp_or_dense, step_size)
+function desc = channel_sift(im, kp_or_dense, step_size, bin_size)
     if strcmp(kp_or_dense, 'kp')
         if size(im,3) > 2
             [~, red] = vl_sift(im(:,:,1));
@@ -61,14 +65,14 @@ function desc = channel_sift(im, kp_or_dense, step_size)
         end
     else % Dense
         if size(im,3) > 2
-            [~, red] = vl_dsift(im(:,:,1), 'step', step_size);
-            [~, green] = vl_dsift(im(:,:,2), 'step', step_size);
-            [~, blue] = vl_dsift(im(:,:,3), 'step', step_size);
+            [~, red] = vl_dsift(im(:,:,1), 'step', step_size, 'size', bin_size);
+            [~, green] = vl_dsift(im(:,:,2), 'step', step_size, 'size', bin_size);
+            [~, blue] = vl_dsift(im(:,:,3), 'step', step_size, 'size', bin_size);
             
             RG = cat(1, red, green);
             desc = cat(1, RG, blue);
         else
-            [~, gray] = vl_dsift(im(:,:,1), 'step', step_size);
+            [~, gray] = vl_dsift(im(:,:,1), 'step', step_size, 'size', bin_size);
             RG = cat(1, gray, gray);
             desc = cat(1, RG, gray);
         end
@@ -78,19 +82,19 @@ end
 % TODO: Check if this is the correct implementation of RGB sift, just
 % concatenated the features of all channels after eachother
 
-function desc = RGBSIFT(path, kp_or_dense, step_size)
+function desc = RGBSIFT(path, kp_or_dense, step_size, bin_size)
     im = im2single(imread(path));
-    desc = channel_sift(im, kp_or_dense, step_size);
+    desc = channel_sift(im, kp_or_dense, step_size, bin_size);
 end
 
-function desc = rgbSIFT(path, kp_or_dense, step_size)
+function desc = rgbSIFT(path, kp_or_dense, step_size, bin_size)
     im = im2single(normalized_rgb(imread(path)));
-    desc = channel_sift(im, kp_or_dense, step_size);
+    desc = channel_sift(im, kp_or_dense, step_size, bin_size);
 end
 
-function desc = opponentSIFT(path, kp_or_dense, step_size)
+function desc = opponentSIFT(path, kp_or_dense, step_size, bin_size)
     im = im2single(opponent_colors(double(imread(path))));
-    desc = channel_sift(im, kp_or_dense, step_size);
+    desc = channel_sift(im, kp_or_dense, step_size, bin_size);
 end
 
 

@@ -10,5 +10,5 @@ end
 
 function svm = train_class(target, data, class)
     target = reshape(double(target == class), size(target));
-    svm = svmtrain(target, data, '-s 0 -t 2 -b 1 -q');
+    svm = svmtrain(target, data, '-s 0 -t 2 -b 1 -q -c 3');
 end
