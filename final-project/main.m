@@ -77,7 +77,7 @@ function main()
     test_histograms = scale(test_histograms, train_mean, train_std);
     
     display('Computing testing accuracy');
-    [predicted_class, class_probs] = predict_SVMs(svm1, svm2, svm3, svm4,...
+    [predicted_class, ap, map] = predict_SVMs(svm1, svm2, svm3, svm4,...
                                                   test_labels, test_histograms');
     
     correct_predictions = predicted_class == test_labels;
