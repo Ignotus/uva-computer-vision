@@ -56,8 +56,8 @@ function desc = channel_sift(im, kp_or_dense, step_size, bin_size)
             [~, green] = vl_sift(im(:,:,2));
             [~, blue] = vl_sift(im(:,:,3));
 
-            RG = cat(1, red, green);
-            desc = cat(1, RG, blue);
+            RG = horzcat(red, green);
+            desc = horzcat( RG, blue);
         else
             [~, gray] = vl_sift(im(:,:,1));
             RG = cat(1, gray, gray);

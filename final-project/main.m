@@ -11,7 +11,7 @@
 
 function main()
     %% Experiment parameters
-    type = 'RGB';
+    type = 'gray';
     kp_or_dense = 'dense';
     %% number of images for clustering
     nimages = 400;
