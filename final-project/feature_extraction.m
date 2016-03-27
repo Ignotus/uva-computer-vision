@@ -52,9 +52,12 @@ end
 function desc = channel_sift(im, kp_or_dense, step_size, bin_size)
     if strcmp(kp_or_dense, 'kp')
         if size(im,3) > 2
-            [~, red] = vl_sift(im(:,:,1));
-            [~, green] = vl_sift(im(:,:,2));
-            [~, blue] = vl_sift(im(:,:,3));
+            grayscale = im2single(rgb2gray(im));
+            [keypoints, ~] = vl_sift(grayscale);
+             
+            [~, red] = vl_sift(im(:,:,1), 'frames', keypoints);
+            [~, green] = vl_sift(im(:,:,2), 'frames', keypoints);
+            [~, blue] = vl_sift(im(:,:,3), 'frames', keypoints);
 
             RG = cat(1, red, green);
             desc = cat(1, RG, blue);
@@ -88,12 +91,22 @@ function desc = RGBSIFT(path, kp_or_dense, step_size, bin_size)
 end
 
 function desc = rgbSIFT(path, kp_or_dense, step_size, bin_size)
-    im = im2single(normalized_rgb(imread(path)));
+    im = imread(path);
+    if size(im,3) > 2
+        im = im2single(normalized_rgb(im));
+    else
+        im = im2single(im);
+    end
     desc = channel_sift(im, kp_or_dense, step_size, bin_size);
 end
 
 function desc = opponentSIFT(path, kp_or_dense, step_size, bin_size)
-    im = im2single(opponent_colors(double(imread(path))));
+    im = imread(path);
+    if size(im,3) > 2
+        im = im2single(opponent_colors(double(im)));
+    else
+        im = im2single(im);
+    end
     desc = channel_sift(im, kp_or_dense, step_size, bin_size);
 end
 
