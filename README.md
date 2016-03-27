@@ -1,18 +1,31 @@
 # Computer Vision Team Project
 
-## Dependencies
-
-- [VLFeat](http://www.vlfeat.org/install-matlab.html)
+[![License](http://img.shields.io/:license-mit-blue.svg)](LICENSE)
 
 ## Description
 
 The following project contains matlab implementation of algorithms for:
 
-- Photometric Stereo (Assignment 1)
-- Gaussian and Gaussian derivative filters (Assignment 2)
-- Harris Corner Detector and tracking with Optical Flow (Assignment 3)
-- Image Stitching and Alignment (Assignment 4)
-- Bag of words image classification (Final Project)
+- Photometric Stereo ([Assignment 1](assignment-1), [Report](assignment-1/report.pdf))
+- Gaussian and Gaussian derivative filters ([Assignment 2](assignment-2), [Report](assignment-2/report.pdf))
+- Harris Corner Detector and tracking with Optical Flow ([Assignment 3](assignment-3), [Report](assignment-3/report.pdf))
+- Image Stitching and Alignment ([Assignment 4](assignment-4), [Report](assignment-4/report.pdf))
+- Bag of words image classification ([Final Project](final-project))
+
+## Dependencies
+
+- [VLFeat](http://www.vlfeat.org/install-matlab.html)
+- [libsvm](https://www.csie.ntu.edu.tw/~cjlin/libsvm/)
+
+## Configuring
+
+After building dependencies from Matlab:
+
+```
+addpath <path to the libsvm folder>/matlab/
+run('<path to the vlfeat folder>/toolbox/vl_setup')
+```
+
 
 ## Copyright
 
