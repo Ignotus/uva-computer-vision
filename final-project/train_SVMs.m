@@ -6,7 +6,6 @@ function [svm1, svm2, svm3, svm4] = train_SVMs(target, data)
     svm2 = train_class(target, data, 2);
     svm3 = train_class(target, data, 3);
     svm4 = train_class(target, data, 4);
-
 end
 
 function svm = train_class(target, data, class)
