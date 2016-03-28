@@ -21,6 +21,9 @@ function descriptors = feature_extraction(path, type, kp_or_dense, step_size, bi
 
     elseif strcmp(type, 'opponent')
         descriptors = opponentSIFT(path, kp_or_dense, step_size, bin_size);
+        
+    elseif strcmp(type, 'hsv')
+        descriptors = HSVSIFT(path, kp_or_dense, step_size, bin_size);
     end
 
 end
@@ -104,6 +107,16 @@ function desc = opponentSIFT(path, kp_or_dense, step_size, bin_size)
     im = imread(path);
     if size(im,3) > 2
         im = im2single(opponent_colors(double(im)));
+    else
+        im = im2single(im);
+    end
+    desc = channel_sift(im, kp_or_dense, step_size, bin_size);
+end
+
+function desc = HSVSIFT(path, kp_or_dense, step_size, bin_size)
+    im = imread(path);
+    if size(im,3) > 2
+        im = im2single(rgb2hsv(im));
     else
         im = im2single(im);
     end
