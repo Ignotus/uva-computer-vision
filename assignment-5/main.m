@@ -10,12 +10,8 @@ function main()
     figure
     hold on
     
-    for x = 1:10
-        [rotation, translation, err] = ICP(source, target);
-        err
-        source = bsxfun(@minus, rotation * source, translation);
-       
-    end
+    [rotation, translation, err] = ICP(source, target, 20);
+    source = bsxfun(@minus, rotation * source, translation);
     
     scatter3(source(1,:), source(2,:), source(3,:), 'b');
     scatter3(target(1,:), target(2,:), target(3,:), 'g');
