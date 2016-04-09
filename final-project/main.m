@@ -15,12 +15,12 @@ function main()
     kp_or_dense = 'kp';
     
     %% number of images for clustering
-    nimages = 400;
+    nimages = 10;
     
-    num_centroids = 800;
+    num_centroids = 2;
     
     step_size = 12;
-    bin_size = 3;
+    bin_size = 4;
 
     extract_sift(type, kp_or_dense, step_size, bin_size);
     
@@ -31,8 +31,12 @@ function main()
     
     [~, ~, ~] = mkdir('./Caltech4/FeatureData', type);
     [~, ~, ~] = mkdir(strcat('./Caltech4/FeatureData/', type), kp_or_dense);
-    [~,~,~] = mkdir(strcat('./Caltech4/FeatureData/', type, '/', kp_or_dense), num2str(num_centroids)); 
-    dump_dir = strcat('./Caltech4/FeatureData/', type, '/', kp_or_dense, '/', num2str(num_centroids), '/');
+    %[~,~,~] = mkdir(strcat('./Caltech4/FeatureData/', type, '/', kp_or_dense), num2str(num_centroids)); 
+    dump_dir = strcat('./Caltech4/FeatureData/', type, '/', kp_or_dense, '/');
+    
+    % , num2str(num_centroids), '/'
+    
+    
     if strcmp(kp_or_dense, 'dense') == 1
         [~, ~, ~] = mkdir(dump_dir, num2str(step_size));
         [~, ~, ~] = mkdir(strcat(dump_dir, num2str(step_size)), num2str(bin_size));
