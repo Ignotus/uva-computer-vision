@@ -5,15 +5,17 @@ ICP algorithm:
 - returns: Rotation and translation matrix
 %}
 
-function [rotation, translation, err] = ICP(source, target, niter)
+function [rotation, translation, matches, err] = ICP(source, target, niter)
     rotation = eye(3, 3);
     translation = zeros(3, 1);
+    matches = zeros(size(target, 2), 1);
     
     for iter=1:niter
         % Step 2: Determine which points are closest.
         closest_points = zeros(1, size(source, 2));
 
         % iterate through points in source cloud
+        display('Computing distances');
         err = 0;
         for x = 1:size(source, 2)
             distance2 = sum(bsxfun(@minus, target, source(:, x)).^2, 1);
@@ -22,7 +24,9 @@ function [rotation, translation, err] = ICP(source, target, niter)
         end
 
         display(sprintf('Error %.2f', err));
-
+        if iter == niter
+            matches(unique(closest_points)) = 1;
+        end
 
         % Step 3: Do an SVD of matrix H
         matched_target = target(:, closest_points);
