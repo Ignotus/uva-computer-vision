@@ -5,35 +5,35 @@ ICP algorithm:
 - returns: Rotation and translation matrix
 %}
 
-function [rotation, translation, matches, err] = ICP(source, target, niter)
+function [rotation, translation, err] = ICP(source, target, niter)
     rotation = eye(3, 3);
     translation = zeros(3, 1);
-    matches = zeros(size(target, 2), 1);
     
     for iter=1:niter
         % Step 2: Determine which points are closest.
         closest_points = zeros(1, size(source, 2));
+        min_distances = zeros(1, size(source, 2));
 
         % iterate through points in source cloud
-        display('Computing distances');
-        err = 0;
+        %display('Computing distances');
         for x = 1:size(source, 2)
             distance2 = sum(bsxfun(@minus, target, source(:, x)).^2, 1);
-            [min_distance, closest_points(x)] = min(distance2, [], 2);
-            err = err + min_distance;
+            [min_distances(x), closest_points(x)] = min(distance2, [], 2);
         end
+        err = mean(min_distances);
+        display(sprintf('MSE %.6f', err));
 
-        display(sprintf('Error %.2f', err));
-        if iter == niter
-            matches(unique(closest_points)) = 1;
-        end
+        threshold = max(min_distances) * 9 / 10 + min(min_distances) * 19 / 10;
+
+        source = source(:, min_distances < threshold);
+        closest_points = closest_points(min_distances < threshold);
 
         % Step 3: Do an SVD of matrix H
         matched_target = target(:, closest_points);
 
         % calculate average centers of mass.
-        ps_avg = sum(source, 2) ./ size(source, 2);
-        pt_avg = sum(matched_target, 2) ./ size(matched_target, 2);
+        ps_avg = mean(source, 2);
+        pt_avg = mean(matched_target, 2);
 
         % center the points by subtracting the average
         centered_source = bsxfun(@minus, source, ps_avg);
@@ -43,12 +43,12 @@ function [rotation, translation, matches, err] = ICP(source, target, niter)
 
         % Perform the SVD
         [U, ~, V] = svd(H);
-        rotation_local = V * U';
+        R = V * diag([1 1 det(U*V')]) * U';
 
-        translation_local = ps_avg - rotation_local * pt_avg;
-        source = bsxfun(@minus, rotation_local * source, translation_local);
+        t = pt_avg - R * ps_avg;
+        source = bsxfun(@plus, R * source, t);
 
-        rotation = rotation * rotation_local;
-        translation = rotation_local * translation + translation_local;
+        rotation = R * rotation;
+        translation = R * translation + t;
     end
 end
