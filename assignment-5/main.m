@@ -2,7 +2,8 @@
 % Authors: Minh Ngo and Riaan Zoetmulder
 
 function main()
-    merge_scenes()
+    merge_scenes_2_1()
+    %merge_scenes_2_2()
     %icp_test()
 end
 
@@ -15,6 +16,11 @@ function icp_test()
     figure
     hold on
     
+    % TODO: Plot subsample size relation / MSE:
+    % - uniform subsampling
+    % - random subsampling
+    % - subsampling more from informative region (Yaaay! Let's do KMeans
+    %   before, dude.
     [rotation, translation, err] = ICP(source, target, 20);
     source = bsxfun(@plus, rotation * source, translation);
 
@@ -30,7 +36,7 @@ function points = frame(id)
     points = points(:, points(3,:) < 1.9);
 end
 
-function merge_scenes()
+function merge_scenes_2_1()
     rt = zeros(99, 3, 3);
     tt = zeros(99, 3, 1);
     nframes = 99;
@@ -61,11 +67,34 @@ function merge_scenes()
         merged_points = [merged_points fr];
     end
 
-    merged_points = merged_points(:, randsample(size(merged_points, 2), 20000));
+    % TODO: Visualize points from different frames in different colors!
+    visualize(merged_points);
+end
 
-    x = merged_points(1,:);
-    y = merged_points(2,:);
-    z = merged_points(3,:);
+function merge_scenes_2_2()
+    merged_points = frame(0);
+    nframes = 99;
+    step_size = 3;
+    frame_indexes = step_size:step_size:nframes;
+    for i=frame_indexes
+        subsampled_target_frame = merged_points(:, randsample(size(merged_points, 2), 2500));
+        fr = frame(i);
+        subsampled_frame = fr(:, randsample(size(fr, 2), 2500));
+        [rotation, translation, err] = ICP(subsampled_frame, subsampled_target_frame, 30, true);
+
+        fr = bsxfun(@plus, rotation * fr, translation);
+        merged_points = [merged_points fr];
+    end
+
+    visualize(merged_points);
+end
+
+function visualize(points)
+    points = points(:, randsample(size(points, 2), 20000));
+
+    x = points(1, :);
+    y = points(2, :);
+    z = points(3, :);
 
     scatter3(x, y, z, 'b');
 end

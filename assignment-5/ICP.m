@@ -28,7 +28,7 @@ function [rotation, translation, err] = ICP(source, target, niter, remove_outlie
         display(sprintf('MSE %.6f', err));
 
         if remove_outliers
-            threshold = max(min_distances) * 9 / 10 + min(min_distances) * 19 / 10;
+            threshold = max(min_distances) * 9 / 10 + min(min_distances) * 11 / 10;
 
             source = source(:, min_distances < threshold);
             closest_points = closest_points(min_distances < threshold);
