@@ -34,8 +34,10 @@ function merge_scenes()
     rt = zeros(99, 3, 3);
     tt = zeros(99, 3, 1);
     nframes = 99;
-    for i=1:nframes
-        tfr = frame(i - 1);
+    step_size = 3;
+    frame_indexes = step_size:step_size:nframes;
+    for i=frame_indexes
+        tfr = frame(i - step_size);
         subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 1000));
         fr = frame(i);
         subsampled_frame = fr(:, randsample(size(fr, 2), 1000));
@@ -47,7 +49,7 @@ function merge_scenes()
     merged_points = frame(0);
     rotation = eye(3, 3);
     translation = zeros(3, 1);
-    for i=1:nframes
+    for i=frame_indexes
         R = squeeze(rt(i,:,:));
         t = tt(i,:,:)';
         rotation = R * rotation;
