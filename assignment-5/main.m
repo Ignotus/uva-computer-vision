@@ -33,7 +33,7 @@ end
 function merge_scenes()
     rt = zeros(99, 3, 3);
     tt = zeros(99, 3, 1);
-    nframes = 2;
+    nframes = 99;
     for i=1:nframes
         tfr = frame(i - 1);
         subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 1000));
