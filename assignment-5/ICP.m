@@ -5,11 +5,7 @@ ICP algorithm:
 - returns: Rotation and translation matrix
 %}
 
-function [rotation, translation, err] = ICP(source, target, niter, remove_outliers)
-    if nargin < 4
-        remove_outliers = false;
-    end
-    display(sprintf('Removing outliers: %d', remove_outliers));
+function [rotation, translation, err] = ICP(source, target, niter)
     rotation = eye(3, 3);
     translation = zeros(3, 1);
     
@@ -25,14 +21,7 @@ function [rotation, translation, err] = ICP(source, target, niter, remove_outlie
             [min_distances(x), closest_points(x)] = min(distance2, [], 2);
         end
         err = mean(min_distances);
-        display(sprintf('MSE %.6f', err));
-
-        if remove_outliers
-            threshold = max(min_distances) * 9 / 10 + min(min_distances) * 11 / 10;
-
-            source = source(:, min_distances < threshold);
-            closest_points = closest_points(min_distances < threshold);
-        end
+        %display(sprintf('MSE %.6f', err));
 
         % Step 3: Do an SVD of matrix H
         matched_target = target(:, closest_points);
