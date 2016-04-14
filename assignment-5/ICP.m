@@ -21,7 +21,7 @@ function [rotation, translation, err] = ICP(source, target, niter)
             [min_distances(x), closest_points(x)] = min(distance2, [], 2);
         end
         err = mean(min_distances);
-        %display(sprintf('MSE %.6f', err));
+        display(sprintf('MSE %.6f', err));
 
         % Step 3: Do an SVD of matrix H
         matched_target = target(:, closest_points);

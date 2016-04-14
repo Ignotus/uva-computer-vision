@@ -17,6 +17,8 @@ function icp_test()
 
     scatter3(source(1,:), source(2,:), source(3,:), 'b');
     scatter3(target(1,:), target(2,:), target(3,:), 'g');
-
+    xlabel('x')
+    ylabel('y')
+    zlabel('z')
     hold off
 end

@@ -1,20 +1,30 @@
-function [rt, tt] = merge_scenes_2_1()
+function [rt, tt, amse] = merge_scenes_2_1()
+    amse = [];
     rt = zeros(99, 3, 3);
     tt = zeros(99, 3, 1);
     nframes = 99;
-    step_size = 3;
+    step_size = 1;
     frame_indexes = step_size:step_size:nframes;
+    mse = zeros(99, 1);
+
     for i=frame_indexes
+        i - step_size
         tfr = frame(i - step_size);
-        subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 1000));
         fr = frame(i);
-        subsampled_frame = fr(:, randsample(size(fr, 2), 1000));
-        [rotation, translation, err] = ICP(subsampled_frame, subsampled_target_frame, 20);
+
+        subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 2000));
+        subsampled_frame = fr(:, randsample(size(fr, 2), 2000));
+        [rotation, translation, mse(i)] = ICP(subsampled_frame, subsampled_target_frame, 40);
         rt(i,:,:) = rotation;
         tt(i,:,:) = translation;
     end
 
+    mse = sum(mse) / size(frame_indexes, 2)
+    amse = [amse mse];
+
     merged_points = frame(0);
+
+    C = ones(1, size(merged_points, 2));
     rotation = eye(3, 3);
     translation = zeros(3, 1);
     for i=frame_indexes
@@ -26,9 +36,11 @@ function [rt, tt] = merge_scenes_2_1()
         fr = frame(i);
         fr = bsxfun(@plus, rotation * fr, translation);
 
-        merged_points = [merged_points fr];
+        %visualize(merged_points);
+        sample = randsample(size(fr, 2), 1000);
+        merged_points = [merged_points fr(:, sample)];
+        C = [C ones(1, 1000) * i];
     end
 
-    % TODO: Visualize points from different frames in different colors!
-    visualize(merged_points);
+    visualize(merged_points, C);
 end
