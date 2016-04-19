@@ -8,10 +8,6 @@ function icp_test()
     hold on
     
     % TODO: Plot subsample size relation / MSE:
-    % - uniform subsampling
-    % - random subsampling
-    % - subsampling more from informative region (Yaaay! Let's do KMeans
-    %   before, dude.
     [rotation, translation, err] = ICP(source, target, 20);
     source = bsxfun(@plus, rotation * source, translation);
 

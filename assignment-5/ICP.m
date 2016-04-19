@@ -5,11 +5,14 @@ ICP algorithm:
 - returns: Rotation and translation matrix
 %}
 
-function [rotation, translation, err] = ICP(source, target, niter)
+function [rotation, translation, err] = ICP(source, target, niter, numsample)
     rotation = eye(3, 3);
     translation = zeros(3, 1);
     
     for iter=1:niter
+        if nargin > 3
+            target = subsample(target, 'uniform',0, numsample);
+        end
         % Step 2: Determine which points are closest.
         closest_points = zeros(1, size(source, 2));
         min_distances = zeros(1, size(source, 2));
