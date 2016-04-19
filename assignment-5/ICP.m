@@ -10,8 +10,8 @@ function [rotation, translation, err] = ICP(source, target, niter, numsample)
     translation = zeros(3, 1);
     
     for iter=1:niter
-        if nargin > 3
-            target = subsample(target, 'uniform',0, numsample);
+        if nargin == 4
+            target = subsample(target, 'uniform', numsample);
         end
         % Step 2: Determine which points are closest.
         closest_points = zeros(1, size(source, 2));

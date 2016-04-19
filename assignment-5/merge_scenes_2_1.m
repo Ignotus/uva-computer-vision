@@ -3,7 +3,7 @@ function [rt, tt, amse] = merge_scenes_2_1()
     rt = zeros(99, 3, 3);
     tt = zeros(99, 3, 1);
     nframes = 99;
-    step_size = 1;
+    step_size = 3;
     frame_indexes = step_size:step_size:nframes;
     mse = zeros(99, 1);
 
@@ -12,8 +12,8 @@ function [rt, tt, amse] = merge_scenes_2_1()
         tfr = frame(i - step_size);
         fr = frame(i);
 
-        subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 2000));
-        subsampled_frame = fr(:, randsample(size(fr, 2), 2000));
+        subsampled_target_frame = tfr(:, randsample(size(tfr, 2), 1000));
+        subsampled_frame = fr(:, randsample(size(fr, 2), 1000));
         [rotation, translation, mse(i)] = ICP(subsampled_frame, subsampled_target_frame, 40);
         rt(i,:,:) = rotation;
         tt(i,:,:) = translation;
