@@ -16,6 +16,7 @@ function part1_3()
     % Obtain the matches. 
     [fr1,fr2,matches] = interest_points(path1, path2);
     
+    
     %% RANSAC
     max_inliers = 0;
     inlier_points = [];
