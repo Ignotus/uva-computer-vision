@@ -7,12 +7,11 @@ function part1_3()
     path2 = 'House/frame00000002.png';
     
     
-    iters = 10; % number of RANSAC iterations
+    iters = 100; % number of RANSAC iterations
     N = 8; % Sample size
-    threshold = 10000; % Sampson distance threshold
+    threshold = 10; % Sampson distance threshold
+    format long g % turn off scientific notation
     
-    
-    format long g
     % Obtain the matches. 
     [fr1,fr2,matches] = interest_points(path1, path2);
     
@@ -38,9 +37,11 @@ function part1_3()
         X_2 = fr2(1,sample(2,:));
         Y_2 = fr2(2,sample(2,:));
         
+        
          % construct the transformation
         [X_1,Y_1, T_1] =transformation_T(X_1,Y_1);
         [X_2,Y_2, T_2] =transformation_T(X_2,Y_2);
+        
         
         % iterate over all the points
         for j = 1:N
@@ -51,8 +52,8 @@ function part1_3()
         [U,S,V] = svd(A);
 
         % reconstruct F
-        temp = V(N,:);
-        F = [[temp(1) temp(2) temp(3)]; [temp(4) temp(5) temp(6)]; [temp(7) temp(8) temp(9)]];
+        temp = V(N-1,:);
+        F = [[temp(1) temp(4) temp(7)]; [temp(2) temp(5) temp(8)]; [temp(3) temp(6) temp(9)]];
 
         % Enforce singularity
         [U_f, D_f, V_f] = svd(F);
@@ -71,17 +72,17 @@ function part1_3()
             num = (P_2(:, h)'*F*P_1(:,h))^2;
             a = F*P_1(:,h);
             b = F'*P_2(:,h);
-            denom = (a(1))^2+(a(2))^2+ (b(1))^2+(b(2))^2;
-            
+            denom = (a(1))^2 +(a(2))^2 + (b(1))^2 +(b(2))^2;
             sampson = num/denom;
+            
             if sampson < threshold
                 inliers = inliers + 1;
-                temp_inliers = [temp_inliers; P_1(:,h)]
+                temp_inliers = horzcat(temp_inliers, P_1(:,h));
             end
         end
         
         if inliers > max_inliers
-            max_inliers = inliers;
+            max_inliers = inliers
             F_max = F;
             inlier_points = temp_inliers;
         end
@@ -90,9 +91,10 @@ function part1_3()
     
     im1 = imread(path1);
     figure 
+    size(inlier_points)
     imshow(im1);
     hold on 
-    plot(inlier_points(1,:),inlier_points(2,:),'go');
+    plot(inlier_points(1,:),inlier_points(2,:), 'go');
     
     
     

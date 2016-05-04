@@ -38,7 +38,7 @@ function part1_2()
     
     % reconstruct F
     temp = V(N,:);
-    F = [[temp(1) temp(2) temp(3)]; [temp(4) temp(5) temp(6)]; [temp(7) temp(8) temp(9)]];
+    F = [[temp(1) temp(4) temp(7)]; [temp(2) temp(5) temp(8)]; [temp(3) temp(6) temp(9)]];
     
     % Enforce singularity
     [U_f, D_f, V_f] = svd(F);
