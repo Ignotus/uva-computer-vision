@@ -9,7 +9,7 @@ function part1_3()
     
     iters = 10; % number of RANSAC iterations
     N = 8; % Sample size
-    threshold = 10; % Sampson distance threshold
+    threshold = 10000; % Sampson distance threshold
     
     
     format long g
@@ -62,9 +62,11 @@ function part1_3()
         F = T_2'*F*T_1;
         
         temp_inliers = [];
+        
         % Check the sampsom distance to count inliers
         inliers = 0;
         for h=1:size(matches, 2)
+            
             num = (P_2(:, h)'*F*P_1(:,h))^2;
             a = F*P_1(:,h);
             b = F'*P_2(:,h);
@@ -73,21 +75,24 @@ function part1_3()
             sampson = num/denom;
             if sampson < threshold
                 inliers = inliers + 1;
-                temp_inliers = [temp_]
+                temp_inliers = [temp_inliers; P_1(:,h)]
             end
         end
         
         if inliers > max_inliers
             max_inliers = inliers;
             F_max = F;
+            inlier_points = temp_inliers;
         end
         
     end
-    lines = epipolarLine(F,P_1)
     
+    im1 = imread(path1);
     figure 
+    imshow(im1);
     hold on 
-    plot()
+    plot(inlier_points(1,:),inlier_points(2,:),'go');
+    
     
     
 end
