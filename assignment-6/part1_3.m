@@ -15,14 +15,14 @@ function part1_3()
     % Obtain the matches. 
     [fr1,fr2,matches] = interest_points(path1, path2);
     
-    
     %% RANSAC
     max_inliers = 0;
     inlier_points = [];
+
     F_max = 0;
     
-    P_1 = vertcat(fr1(1:2,:), ones(1, size(fr1,2)));
-    P_2 = vertcat(fr2(1:2,:), ones(1, size(fr2,2)));
+    P_1 = vertcat(fr1(1:2, matches(1, :)), ones(1, size(matches,2)));
+    P_2 = vertcat(fr2(1:2, matches(2, :)), ones(1, size(matches,2)));
     
     for i = 1:iters
         A = zeros(N,9);
@@ -45,15 +45,25 @@ function part1_3()
         
         % iterate over all the points
         for j = 1:N
-            A(j,:) = [X_1(j)*X_2(j), X_1(j)*Y_2(j), X_1(j), Y_1(j)*X_2(j), Y_1(j)*Y_2(j), Y_1(j), X_2(j), Y_2(j), 1];
+            A(j,:) = [X_1(j)*X_2(j)
+                      X_1(j)*Y_2(j)
+                      X_1(j)
+                      Y_1(j)*X_2(j)
+                      Y_1(j)*Y_2(j)
+                      Y_1(j)
+                      X_2(j)
+                      Y_2(j)
+                      1];
         end
         
         % Perform an SVD of A
-        [U,S,V] = svd(A);
+        [~, ~, V] = svd(A);
 
         % reconstruct F
         temp = V(N-1,:);
-        F = [[temp(1) temp(4) temp(7)]; [temp(2) temp(5) temp(8)]; [temp(3) temp(6) temp(9)]];
+        F = [temp(1) temp(4) temp(7);
+             temp(2) temp(5) temp(8);
+             temp(3) temp(6) temp(9)];
 
         % Enforce singularity
         [U_f, D_f, V_f] = svd(F);
@@ -86,7 +96,6 @@ function part1_3()
             F_max = F;
             inlier_points = temp_inliers;
         end
-        
     end
     
     im1 = imread(path1);
@@ -98,5 +107,5 @@ function part1_3()
     
     epipolar_lines = F_max * inlier_points;
     
-    draw_line(inlier_points(1:2, :), epipolar_lines(1:2, :), im1)
+    draw_line(inlier_points(1:2, :), epipolar_lines(1:2, :), im1);
 end
