@@ -17,7 +17,8 @@ function part1_3()
     
     %% RANSAC
     max_inliers = 0;
-    inlier_points = [];
+    inlier_points_p1 = [];
+    inlier_points_p2 = [];
 
     F_max = 0;
     
@@ -73,7 +74,8 @@ function part1_3()
         % Denormalization
         F = T_2'*F*T_1;
         
-        temp_inliers = [];
+        temp_inliers_p1 = [];
+        temp_inliers_p2 = [];
         
         % Check the sampsom distance to count inliers
         inliers = 0;
@@ -87,25 +89,30 @@ function part1_3()
             
             if sampson < threshold
                 inliers = inliers + 1;
-                temp_inliers = horzcat(temp_inliers, P_1(:,h));
+                temp_inliers_p1 = horzcat(temp_inliers_p1, P_1(:,h));
+                temp_inliers_p2 = horzcat(temp_inliers_p2, P_2(:,h));
             end
         end
         
         if inliers > max_inliers
             max_inliers = inliers
             F_max = F;
-            inlier_points = temp_inliers;
+            inlier_points_p1 = temp_inliers_p1;
+            inlier_points_p2 = temp_inliers_p2;
         end
     end
     
     im1 = imread(path1);
-    figure 
-    size(inlier_points)
-    imshow(im1);
-    hold on 
-    plot(inlier_points(1,:),inlier_points(2,:), 'go');
     
-    epipolar_lines = F_max * inlier_points;
+    im2 = imread(path2);
+%     figure 
+%     size(inlier_points_p1)
+%     imshow(im1);
+%     hold on 
+%     plot(inlier_points_p1(1,:),inlier_points_p1(2,:), 'go');
     
-    draw_line(inlier_points(1:2, :), epipolar_lines(1:2, :), im1);
+    hold on
+    epipolar_lines = F_max * inlier_points_p1;
+    
+    draw_line(inlier_points_p2(1:2, :), epipolar_lines(1:2, :), im2);
 end
