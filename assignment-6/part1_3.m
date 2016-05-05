@@ -1,7 +1,7 @@
 % 1.3: Normalized Eight Point algorithm with RANSAC
 
 function part1_3()
-    
+    close all
     % path to test with
     path1 = 'House/frame00000001.png';
     path2 = 'House/frame00000002.png';
@@ -96,6 +96,7 @@ function part1_3()
     hold on 
     plot(inlier_points(1,:),inlier_points(2,:), 'go');
     
+    epipolar_lines = F_max * inlier_points;
     
-    
+    draw_line(inlier_points(1:2, :), epipolar_lines(1:2, :), im1)
 end
