@@ -44,7 +44,7 @@ for i = 1:iters
 
     % reconstruct F
     F = reshape(V(:, end), 3, 3);
-
+    
     % Enforce singularity
     [U_f, D_f, V_f] = svd(F);
     D_f(end, end) = 0;
@@ -84,9 +84,7 @@ for i = 1:iters
         F_max = F;
         inlier_points_p1 = temp_inliers_p1;
         inlier_points_p2 = temp_inliers_p2;
-    elseif inliers == max_inliers
-        break
     end
-    max_inliers
-    min_outliers
+    max_inliers;
+    min_outliers;
 end
