@@ -42,8 +42,8 @@ for i=2:nframes
     end
     
     % Return only X and Y coordinates
-    inlier_points_p1 = inlier_points_p1(1:2,:);
-    inlier_points_p2 = inlier_points_p2(1:2,:);
+    inlier_points_p1 = round(inlier_points_p1(1:2,:));
+    inlier_points_p2 = round(inlier_points_p2(1:2,:));
     
     if i == 2
         point_view_mat = zeros(nframes - 1, size(inlier_points_p2, 2), 2);
@@ -78,6 +78,10 @@ for i=2:nframes
     desc1 = desc2;
 end
 
+% Finding dense blocks
+point_view_mat = point_view_mat(:, sum(sum(point_view_mat, 3) > 0, 1) > 40, :);
+size(point_view_mat)
+
 %% Normalize the point coordinates by translating them to the mean of the
 %% points in each view
 point_view_mat = bsxfun(@minus, point_view_mat, mean(point_view_mat, 2));
@@ -91,9 +95,6 @@ end
 
 %% Applying SVD
 [U, W, V] = svd(D);
-size(U)
-size(W)
-size(V)
 
 %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
 U3 = U(:,1:3);

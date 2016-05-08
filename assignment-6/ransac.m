@@ -87,6 +87,6 @@ for i = 1:iters
         inlier_points_p2 = temp_inliers_p2;
     end
 
-    max_inliers
+    max_inliers;
     min_outliers;
 end
