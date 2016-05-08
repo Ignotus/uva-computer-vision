@@ -12,11 +12,12 @@ inlier_points_p2 = [];
 
 F_max = 0;
 
+% Using only matched points
 P_1 = vertcat(fr1(1:2, matches(1, :)), ones(1, size(matches,2)));
 P_2 = vertcat(fr2(1:2, matches(2, :)), ones(1, size(matches,2)));
 
 for i = 1:iters
-    % Randomly sample 8 points
+    % Randomly sample N points
     r = randsample(size(matches, 2), N);
     
     % Find the coordinates of the matching points
@@ -85,6 +86,11 @@ for i = 1:iters
         inlier_points_p1 = temp_inliers_p1;
         inlier_points_p2 = temp_inliers_p2;
     end
+
+    % Return only X and Y coordinates
+    inlier_points_p1 = inlier_points_p1(1:2,:);
+    inlier_points_p2 = inlier_points_p2(1:2,:);
+
     max_inliers;
     min_outliers;
 end
