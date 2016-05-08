@@ -6,7 +6,7 @@ close all;
 
 format long g % turn off scientific notation
 
-nframes = 4;
+nframes = 49;
 debug = false;
 
 prev_frame = frame(1);
@@ -23,9 +23,9 @@ for i=2:nframes
     current_frame = frame(i);
 
     % Obtain the matches.
-    [fr2, matches, desc2] = interest_points(prev_frame, current_frame,...
-                                            fr1, desc1,...
-                                            debug);
+    [fr2, matches, desc2, current_frame] = interest_points(prev_frame, current_frame,...
+                                                           fr1, desc1,...
+                                                           debug);
 
     [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches);
 
@@ -40,6 +40,10 @@ for i=2:nframes
         epipolar_lines_2 = F * inlier_points_p1;
         draw_line(inlier_points_p2, epipolar_lines_2, im2);
     end
+    
+    % Return only X and Y coordinates
+    inlier_points_p1 = inlier_points_p1(1:2,:);
+    inlier_points_p2 = inlier_points_p2(1:2,:);
     
     if i == 2
         point_view_mat = zeros(nframes - 1, size(inlier_points_p2, 2), 2);
@@ -87,6 +91,9 @@ end
 
 %% Applying SVD
 [U, W, V] = svd(D);
+size(U)
+size(W)
+size(V)
 
 %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
 U3 = U(:,1:3);

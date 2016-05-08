@@ -1,4 +1,4 @@
-function [fr2,matches,desc2] = interest_points(im1, im2, fr1, desc1, debug)   
+function [fr2,matches,desc2, im2] = interest_points(im1, im2, fr1, desc1, debug)
     % Check whether they are color or gray
     if length(size(im2)) == 3
         im2 = rgb2gray(im2)             ;
@@ -44,11 +44,11 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     Y_2 = frames2(2, matches(2,:));
 
     % Plot this
-    figure(1);
+    figure, hold on;
     imshow(concatenated_figure);
     
-    hold on;
     % Create the lines
+    hold on;
     lines = plot([X_1; X_2], [Y_1;Y_2]);
     set(lines,'color','r');
 
@@ -60,6 +60,5 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     vl_plotframe(frames2(:, matches(2,:)));
 
     title('Matching Pairs');
-    hold off;
 end
 

@@ -1,8 +1,8 @@
 function [F_max, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches)
 %% PARAMETERS
-iters = 100; % number of RANSAC iterations
-N = 9; % Sample size
-threshold = 2; % Sampson distance threshold
+iters = 200; % number of RANSAC iterations
+N = 8; % Sample size
+threshold = 1; % Sampson distance threshold
 
 %% RANSAC
 max_inliers = 0;
@@ -38,7 +38,7 @@ for i = 1:iters
     
     A = A';
     
-    assert(all(A(:, N) == 1));
+    assert(all(A(:, end) == 1));
     
     % Perform an SVD of A
     [~, ~, V] = svd(A);
@@ -86,10 +86,6 @@ for i = 1:iters
         inlier_points_p1 = temp_inliers_p1;
         inlier_points_p2 = temp_inliers_p2;
     end
-
-    % Return only X and Y coordinates
-    inlier_points_p1 = inlier_points_p1(1:2,:);
-    inlier_points_p2 = inlier_points_p2(1:2,:);
 
     max_inliers
     min_outliers;
