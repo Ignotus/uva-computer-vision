@@ -1,17 +1,24 @@
-function [] = draw_line(p1, p2, img)
-figure
-imshow(img)
-hold on
+function [] = draw_line(p1, epipolar_lines, img)
+figure;
+imshow(img);
+hold on;
 
-xp1 = p1(1,:);
-xp2 = p2(1,:);
-yp1 = p1(2,:);
-yp2 = p2(2,:);
+% ax +by + c = 0
+% setting x = 0, y = -c / b
+p2 = zeros(size(p1));
+p2(2,:) = -epipolar_lines(3,:) ./ epipolar_lines(2,:);
+direction = p2 - p1;
+direction = direction;
 
-for i=1:size(p1, 2)
-    plot([xp1(i); xp2(i)], [yp1(i); yp2(i)])
+plot(p1(1,:), p1(2,:), '*');
 
-end
+xp1 = p1(1,:) - 100000 * direction(1,:);
+xp2 = p1(1,:) + 100000 * direction(1,:);
+yp1 = p1(2,:) - 100000 * direction(2,:);
+yp2 = p1(2,:) + 100000 * direction(2,:);
 
-plot(xp1, yp1,'*');
-plot(xp2, yp2, 'o');
+hold on;
+plot([xp1; xp2], [yp1; yp2]);
+
+legend('frame point','Epipolar lines')
+hold off;

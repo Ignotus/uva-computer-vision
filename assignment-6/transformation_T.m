@@ -5,22 +5,28 @@ Output: transformed; X and Y Points
 %}
 
 function [X_points, Y_points, T] = transformation_T(X,Y)
-    
     % calculate means and standard deviation
     N = size(X,2);
-    v = ones(1,N)';
-    m_x = (1/N)*X*v; 
-    m_y = (1/N)*Y*v;
-    d = (1/N)* sum(((((X - m_x).^2 + (Y - m_y).^2)).^(1/2)));
+    m_x = mean(X);
+    m_y = mean(Y);
+    
+    d = mean(sqrt((X - m_x).^2 + (Y - m_y).^2));
     
     % construct the matrix T
-    T = [[(2^(1/2))/d 0 -m_x*(2^(1/2))/d];[0 (2^(1/2))/d  -m_y*(2^(1/2))/d];[0 0 1]];
+    T = [sqrt(2)/d     0            -m_x*sqrt(2)/d;
+         0             sqrt(2)/d    -m_y*sqrt(2)/d;
+         0             0            1];
     
     % transform points.
-    U = vertcat(vertcat(X,Y), ones(1,N));
+    U = vertcat(X, Y, ones(1,N));
     
-    U = T*U;
+    U = T * U;
+    assert(size(U, 1) == 3);
     
-    X_points= U(1,:);
-    Y_points = U(2,:);
+    X_points = U(1, :);
+    Y_points = U(2, :);
+    
+    assert(mean(X_points) < 0.00001);
+    assert(mean(Y_points) < 0.00001);
+    assert(abs(mean(sqrt(X_points .^2 + Y_points .^2)) - sqrt(2)) < 0.00001);
 end

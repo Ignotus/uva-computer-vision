@@ -17,7 +17,7 @@ function [fr1,fr2,matches] = interest_points(path1, path2)
         im2 = rgb2gray(im2);
     end
     
-    % conver to single
+    % convert to single
     im1 = im2single(im1);
     im2 = im2single(im2);
     
@@ -31,12 +31,6 @@ function [fr1,fr2,matches] = interest_points(path1, path2)
 end
 
 function plot_sift(matches, im1, im2, frames1, frames2)
-    % get a random sample
-    r = randperm(size(matches,2), 200);
-
-    % Create a random sample of the matches and scores
-    sample_matches = matches(:, r);
-
     % I have used the following tutorial, and took inspiration from the code
     % used to generate the tutorial, Found at:
     % https://github.com/vlfeat/vlfeat/blob/master/toolbox/demo/vl_demo_sift_match.m
@@ -56,27 +50,29 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     concatenated_figure = cat(2,img1,img2);
 
     % rescale the x-coordinates for second figure
-    X_1 = frames1(1,sample_matches(1,:));
-    Y_1 = frames1(2,sample_matches(1,:));
+    X_1 = frames1(1, matches(1,:));
+    Y_1 = frames1(2, matches(1,:));
 
-    X_2 = frames2(1,sample_matches(2,:)) + length(img1(1,:));
-    Y_2 = frames2(2,sample_matches(2,:));
+    X_2 = frames2(1, matches(2,:)) + length(img1(1,:));
+    Y_2 = frames2(2, matches(2,:));
 
     % Plot this
     figure(1);
     imshow(concatenated_figure);
-
+    
     hold on;
-
     % Create the lines
     lines = plot([X_1; X_2], [Y_1;Y_2]);
     set(lines,'color','r');
 
     % create the points
-    vl_plotframe(frames1(:, sample_matches(1,:)));
+    hold on;
+    vl_plotframe(frames1(:, matches(1,:)));
     frames2(1,:) = frames2(1,:) + length(img1(1,:));
-    vl_plotframe(frames2(:, sample_matches(2,:)));
+    hold on;
+    vl_plotframe(frames2(:, matches(2,:)));
 
     title('Matching Pairs');
+    hold off;
 end
 
