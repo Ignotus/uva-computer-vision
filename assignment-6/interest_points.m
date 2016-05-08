@@ -10,7 +10,7 @@ function [fr2,matches,desc2, im2] = interest_points(im1, im2, fr1, desc1, debug)
     % run sift with matching features.
     [fr2, desc2] = vl_sift(im2);
     
-    [matches, ~] = vl_ubcmatch(desc1, desc2);
+    [matches, ~] = vl_ubcmatch(desc1, desc2, 5);
     
     if debug
         plot_sift(matches, im1, im2, fr1, fr2);
@@ -60,5 +60,6 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     vl_plotframe(frames2(:, matches(2,:)));
 
     title('Matching Pairs');
+    hold off;
 end
 

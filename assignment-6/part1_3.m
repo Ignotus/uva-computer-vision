@@ -28,7 +28,7 @@ for i=2:nframes
                                                            debug);
 
     [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches);
-
+    display(sprintf('Inliers: %d', size(inlier_points_p2, 2)));
     if debug
         im1 = prev_frame;
         im2 = current_frame;
@@ -68,6 +68,7 @@ for i=2:nframes
                 point_view_mat(i-1,end,:) = inlier_points_p2(:,j);
             else
                 %% IGNORE THAT CASE
+                %% display(sprintf('Several matches: %d', n_point_match));
             end
         end
     end
@@ -79,7 +80,7 @@ for i=2:nframes
 end
 
 % Finding dense blocks
-point_view_mat = point_view_mat(:, sum(sum(point_view_mat, 3) > 0, 1) > 40, :);
+point_view_mat = point_view_mat(:, sum(sum(point_view_mat, 3) > 0, 1) > 0.1 * nframes, :);
 size(point_view_mat)
 
 %% Normalize the point coordinates by translating them to the mean of the
