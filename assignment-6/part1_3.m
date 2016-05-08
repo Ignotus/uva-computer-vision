@@ -74,4 +74,29 @@ for i=2:nframes
     desc1 = desc2;
 end
 
-point_view_mat
+%% Normalize the point coordinates by translating them to the mean of the
+%% points in each view
+point_view_mat = bsxfun(@minus, point_view_mat, mean(point_view_mat, 2));
+
+%% Constructing the measurement matrix D
+[M, N, ~] = size(point_view_mat);
+D = zeros(2 * M, N);
+for i=1:2
+	D(i:2:end,:) = point_view_mat(:,:,i);
+end
+
+%% Applying SVD
+[U, W, V] = svd(D);
+
+%% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
+U3 = U(:,1:3);
+W3 = W(1:3,1:3);
+V3 = V(:,1:3)';
+
+% Page 99
+M = U3 * sqrt(W3);
+S = sqrt(W3) * V3;
+
+C = ones(1, size(S, 2));
+C(1,2:end) = 2;
+visualize(S, C);

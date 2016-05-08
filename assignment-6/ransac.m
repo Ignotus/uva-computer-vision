@@ -91,6 +91,6 @@ for i = 1:iters
     inlier_points_p1 = inlier_points_p1(1:2,:);
     inlier_points_p2 = inlier_points_p2(1:2,:);
 
-    max_inliers;
+    max_inliers
     min_outliers;
 end
