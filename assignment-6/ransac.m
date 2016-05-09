@@ -1,8 +1,8 @@
 function [F_max, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches)
 %% PARAMETERS
-iters = 200; % number of RANSAC iterations
-N = 10; % Sample size
-threshold = 0.1; % Sampson distance threshold
+iters = 100; % number of RANSAC iterations
+N = 9; % Sample size
+threshold = 1; % Sampson distance threshold
 
 %% RANSAC
 max_inliers = 0;

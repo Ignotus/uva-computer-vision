@@ -6,8 +6,11 @@ close all;
 
 format long g % turn off scientific notation
 
-nframes = 49;
+%% Parameters
+nframes = 10;
 debug = false;
+%% Numbers of consecutive frames to take in consideration
+K = 3;
 
 prev_frame = frame(1);
 if length(size(prev_frame)) == 3
@@ -79,33 +82,66 @@ for i=2:nframes
     desc1 = desc2;
 end
 
-% Finding dense blocks
-point_view_mat = point_view_mat(:, sum(sum(point_view_mat, 3) > 0, 1) > 0.1 * nframes, :);
-size(point_view_mat)
+merged_points_transformed = [];
+merged_points = [];
+C = [];
+translation = zeros(nframes-K, 3);
+rotation = zeros(nframes-K, 3, 3);
+scale = zeros(nframes-K, 1);
+for i=1:nframes-K
+    i
+    local_point_view = point_view_mat(i:i+K-1,:,:);
+    % Finding dense blocks
+    local_point_view = local_point_view(:, sum(sum(local_point_view, 3) > 0, 1) >= K, :);
+    size(local_point_view)
 
-%% Normalize the point coordinates by translating them to the mean of the
-%% points in each view
-point_view_mat = bsxfun(@minus, point_view_mat, mean(point_view_mat, 2));
+    %% Normalize the point coordinates by translating them to the mean of the
+    %% points in each view
+    local_point_view = bsxfun(@minus, local_point_view, mean(local_point_view, 2));
 
-%% Constructing the measurement matrix D
-[M, N, ~] = size(point_view_mat);
-D = zeros(2 * M, N);
-for i=1:2
-	D(i:2:end,:) = point_view_mat(:,:,i);
+    %% Constructing the measurement matrix D
+    [M, N, ~] = size(local_point_view);
+    D = zeros(2 * M, N);
+    for j=1:2
+        D(j:2:end,:) = local_point_view(:,:,j);
+    end
+
+    %% Applying SVD
+    [U, W, V] = svd(D);
+
+    %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
+    U3 = U(:,1:3);
+    W3 = W(1:3,1:3);
+    V3 = V(:,1:3)';
+
+    % Page 99
+    M = U3 * sqrt(W3);
+    S = sqrt(W3) * V3;
+    
+    merged_points = [merged_points S];
+
+    if i > 1
+        prev_points = merged_points(:, C == i -1);
+        
+        display(sprintf('Prev points: %d', size(prev_points, 2)));
+        
+        min_length = min(size(prev_points, 2), size(S, 2));
+        
+        [~, ~, transform] = procrustes(prev_points(:, 1:min_length)',...
+                                       S(:, 1:min_length)', ...
+                                       'scaling', false, ...
+                                       'reflection', false);
+        translation(i, :) = transform.c(1, :);
+        rotation(i, :, :) = transform.T;
+        scale(i, :) = transform.b;
+        S = S';
+        for k=i:-1:2
+            S = bsxfun(@plus, scale(k, :) * S * squeeze(rotation(k, :, :))', translation(k, :));
+        end
+        S = S';
+    end
+    merged_points_transformed = [merged_points_transformed S];
+    C = [C ones(1, size(S, 2)) * i];
 end
 
-%% Applying SVD
-[U, W, V] = svd(D);
-
-%% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
-U3 = U(:,1:3);
-W3 = W(1:3,1:3);
-V3 = V(:,1:3)';
-
-% Page 99
-M = U3 * sqrt(W3);
-S = sqrt(W3) * V3;
-
-C = ones(1, size(S, 2));
-C(1,2:end) = 2;
-visualize(S, C);
+visualize(merged_points, C);
