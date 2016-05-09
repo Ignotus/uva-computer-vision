@@ -20,5 +20,3 @@ hold on;
 plot([xp1; xp2], [yp1; yp2]);
 
 legend('frame point','Epipolar lines');
-
-hold off;

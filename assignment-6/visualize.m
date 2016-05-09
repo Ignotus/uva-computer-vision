@@ -4,5 +4,11 @@ function visualize(points, C)
     z = points(3,:)';
 
     figure;
-    fscatter3(x, y, z, C');
+    if nargin == 1
+        C = ones(1, size(points, 2));
+        C(1, end) = 10;
+        fscatter3(x, y, z, C');
+    else
+        fscatter3(x, y, z, C');
+    end
 end

@@ -44,12 +44,12 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     Y_2 = frames2(2, matches(2,:));
 
     % Plot this
-    figure, hold on;
+    figure;
     imshow(concatenated_figure);
     
     % Create the lines
     hold on;
-    lines = plot([X_1; X_2], [Y_1;Y_2]);
+    lines = plot([X_1; X_2], [Y_1; Y_2]);
     set(lines,'color','r');
 
     % create the points
@@ -59,7 +59,6 @@ function plot_sift(matches, im1, im2, frames1, frames2)
     hold on;
     vl_plotframe(frames2(:, matches(2,:)));
 
-    title('Matching Pairs');
-    hold off;
+    %title('Matching Pairs');
 end
 
