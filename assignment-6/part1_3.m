@@ -169,8 +169,11 @@ for i=1:1:nframes-K+1
     V3 = V(:,1:3)';
     
     % Page 99
-    M = U3 * W3.^(0.9);
-    S = W3.^(0.1) * V3;
+    M = U3 * W3^(0.5);
+    S = W3^(0.5) * V3;
+    
+    % Scaling Z
+    S(3,:) = S(3,:) * 10;
     merged_points = [merged_points S];
     
     if debug
