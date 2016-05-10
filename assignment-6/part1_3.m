@@ -17,7 +17,7 @@ if teddy
 else
     nframes = 49;
     %% Numbers of consecutive frames to take in consideration
-    K = 3;
+    K = 2;
 end
 
 
@@ -28,12 +28,16 @@ display('Building point view matrix');
 for i=2:nframes+1
     display(sprintf('Iteration %d', i));
     % path to test with
-    current_frame = frame(mod(i, nframes) + 1, teddy);
+    if i == nframes + 1
+        current_frame = frame(1, teddy);
+    else
+        current_frame = frame(i, teddy);
+    end
 
     % Obtain the matches.
     [fr2, matches, desc2, current_frame] = interest_points(prev_frame, current_frame,...
                                                            fr1, desc1,...
-                                                           debug, teddy);
+                                                           debug, teddy, 0, 0);
 
     [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches);
     display(sprintf('Inliers: %d', size(inlier_points_p2, 2)));
@@ -61,9 +65,9 @@ for i=2:nframes+1
         if check_prev_prev
             prev_prev_frame = frame(i - 2, teddy);
             [fr0, desc0] = vl_sift(prev_prev_frame);
-            [fr2_0, matches0, desc2_0, current_frame] = interest_points(prev_prev_frame, current_frame,...
+            [~, matches0, ~, current_frame] = interest_points(prev_prev_frame, current_frame,...
                                                                fr0, desc0,...
-                                                               debug, teddy);
+                                                               debug, teddy, fr2, desc2);
             [~, inlier_points_p0, inlier_points_p2_0] = ransac(fr0, fr2, matches0);
             inlier_points_p0 = inlier_points_p0(1:2,:);
             inlier_points_p2_0 = inlier_points_p2_0(1:2,:);
