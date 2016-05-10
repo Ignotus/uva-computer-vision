@@ -28,7 +28,7 @@ for i=2:nframes
     % Obtain the matches.
     [fr2, matches, desc2, current_frame] = interest_points(prev_frame, current_frame,...
                                                            fr1, desc1,...
-                                                           debug);
+                                                           debug, teddy);
 
     [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches);
     display(sprintf('Inliers: %d', size(inlier_points_p2, 2)));
@@ -58,7 +58,7 @@ for i=2:nframes
             [fr0, desc0] = vl_sift(prev_prev_frame);
             [fr2_0, matches0, desc2_0, current_frame] = interest_points(prev_prev_frame, current_frame,...
                                                                fr0, desc0,...
-                                                               debug);
+                                                               debug, teddy);
             [~, inlier_points_p0, inlier_points_p2_0] = ransac(fr0, fr2, matches0);
             inlier_points_p0 = inlier_points_p0(1:2,:);
             inlier_points_p2_0 = inlier_points_p2_0(1:2,:);
@@ -133,68 +133,71 @@ translation = zeros(nframes-K, 3, 1);
 display('Stitching');
 for i=1:1:nframes-K
     display(sprintf('Iteration %d', i))
-    local_point_view = point_view_mat(i:i+K-1,:,:);
-    % Finding dense blocks
-    local_point_view = local_point_view(:, sum(sum(local_point_view, 3) > 0, 1) > K - 1, :);
-    
-    %% Normalize the point coordinates by translating them to the mean of the
-    %% points in each view
-    local_point_view = bsxfun(@minus, local_point_view, mean(local_point_view, 2));
-    %% Constructing the measurement matrix D
-    [M, N, ~] = size(local_point_view);
-    D = zeros(2 * M, N);
-    for j=1:2
-        D(j:2:end,:) = local_point_view(:,:,j);
-    end
+    try
+        local_point_view = point_view_mat(i:i+K-1,:,:);
+        % Finding dense blocks
+        local_point_view = local_point_view(:, sum(sum(local_point_view, 3) > 0, 1) > K - 1, :);
 
-    %% Applying SVD
-    [U, W, V] = svd(D);
+        %% Normalize the point coordinates by translating them to the mean of the
+        %% points in each view
+        local_point_view = bsxfun(@minus, local_point_view, mean(local_point_view, 2));
+        %% Constructing the measurement matrix D
+        [M, N, ~] = size(local_point_view);
+        D = zeros(2 * M, N);
+        for j=1:2
+            D(j:2:end,:) = local_point_view(:,:,j);
+        end
 
-    %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
-    U3 = U(:,1:3);
-    W3 = W(1:3,1:3);
-    V3 = V(:,1:3)';
+        %% Applying SVD
+        [U, W, V] = svd(D);
 
-    % Page 99
-    M = U3 * W3.^10;
-    S = W3.^(0.1) * V3;
+        %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
+        U3 = U(:,1:3);
+        W3 = W(1:3,1:3);
+        V3 = V(:,1:3)';
 
-    merged_points = [merged_points S];
-    
-    if debug
-        scatter3(S(1,:), S(2,:), S(3,:));
-    end
+        % Page 99
+        M = U3 * W3.^10;
+        S = W3.^(0.1) * V3;
 
-    if i > 1
-        prev_points = merged_points(:, C == i - K);
-        
-        min_length = min(size(prev_points, 2), size(S, 2));
-        
-        if use_icp
-            [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 40, debug);
-        else
-            [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
-                                           S(:, 1:min_length)', ...
-                                           'scaling', false,...
-                                           'reflection', false);
-            if debug
-                visualize([prev_points(:, 1:min_length) Z'], [ones(1, min_length) ones(1, min_length - 1) * 2 10]);
+        merged_points = [merged_points S];
+
+        if debug
+            scatter3(S(1,:), S(2,:), S(3,:));
+        end
+
+        if i > 1
+            prev_points = merged_points(:, C == i - K);
+
+            min_length = min(size(prev_points, 2), size(S, 2));
+
+            if use_icp
+                [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 40, debug);
+            else
+                [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
+                                               S(:, 1:min_length)', ...
+                                               'scaling', false,...
+                                               'reflection', false);
+                if debug
+                    visualize([prev_points(:, 1:min_length) Z'], [ones(1, min_length) ones(1, min_length - 1) * 2 10]);
+                end
+
+                rotation(i, :, :) = transform.T;
+                translation(i, :, :) = transform.c(1, :);
             end
-
-            rotation(i, :, :) = transform.T;
-            translation(i, :, :) = transform.c(1, :);
+            S = S';
+            for k=i:-K:2
+                S = bsxfun(@plus, S * squeeze(rotation(k, :, :)), translation(k, :, :));
+            end
+            S = S';
         end
-        S = S';
-        for k=i:-K:2
-            S = bsxfun(@plus, S * squeeze(rotation(k, :, :)), translation(k, :, :));
+        merged_points_transformed = [merged_points_transformed S];
+        C = [C ones(1, size(S, 2)) * i];
+        if stitch == false
+            C(1, end) = 10;
+            break;
         end
-        S = S';
-    end
-    merged_points_transformed = [merged_points_transformed S];
-    C = [C ones(1, size(S, 2)) * i];
-    if stitch == false
-        C(1, end) = 10;
-        break;
+    catch
     end
 end
 
