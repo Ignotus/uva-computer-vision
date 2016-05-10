@@ -1,12 +1,4 @@
 function [fr2,matches,desc2, im2] = interest_points(im1, im2, fr1, desc1, debug)
-    % Check whether they are color or gray
-    if length(size(im2)) == 3
-        im2 = rgb2gray(im2)             ;
-    end
-    
-    % convert to single
-    im2 = im2single(im2);
-    
     % run sift with matching features.
     [fr2, desc2] = vl_sift(im2);
     
