@@ -11,9 +11,10 @@ nframes = 49;
 debug = false;
 stitch = false;
 use_icp = true;
+check_prev_prev = true;
 teddy = false;
 %% Numbers of consecutive frames to take in consideration
-K = 4;
+K = 3;
 
 prev_frame = frame(1, teddy);
 [fr1, desc1] = vl_sift(prev_frame);
@@ -52,6 +53,16 @@ for i=2:nframes
         point_view_mat(i-1,:,:) = inlier_points_p1';
         point_view_mat(i,:,:) = inlier_points_p2';
     else
+        if check_prev_prev
+            prev_prev_frame = frame(i - 2, teddy);
+            [fr0, desc0] = vl_sift(prev_prev_frame);
+            [fr2_0, matches0, desc2_0, current_frame] = interest_points(prev_prev_frame, current_frame,...
+                                                               fr0, desc0,...
+                                                               debug);
+            [~, inlier_points_p0, inlier_points_p2_0] = ransac(fr0, fr2, matches0);
+            inlier_points_p0 = inlier_points_p0(1:2,:);
+            inlier_points_p2_0 = inlier_points_p2_0(1:2,:);
+        end
         %% Iterate across inliers!
         for j = 1:size(inlier_points_p2, 2)
             % Finding number of matched points from the previous iteration
@@ -63,12 +74,37 @@ for i=2:nframes
                 %% Insert to the matched position
                 point_view_mat(i,point_match,:) = inlier_points_p2(:,j);
             elseif n_point_match == 0
-                %% Add a new column to point-view matrix for each newly
-                %% introduced point.
-                point_view_mat(:,end+1,:) = 0;
-
-                %% Adding this point to the last column
-                point_view_mat(i,end,:) = inlier_points_p2(:,j);
+                if check_prev_prev == false
+                    %% Add a new column to point-view matrix for each newly
+                    %% introduced point.
+                    point_view_mat(:,end+1,:) = 0;
+                    
+                    %% Adding this point to the last column
+                    point_view_mat(i,end,:) = inlier_points_p2(:,j);
+                    continue
+                end
+                index = -1;
+                for k = 1:size(inlier_points_p2_0, 2)
+                    if inlier_points_p2_0(:,k) == inlier_points_p2(:,j)
+                        index = k;
+                        break;
+                    end
+                end
+                
+                if index ~= -1
+                    point_match = point_view_mat(i-2,:,1) == inlier_points_p0(1,index)...
+                        & point_view_mat(i-2,:,2) == inlier_points_p0(2,index);
+                    n_point_match = sum(point_match);
+                    if n_point_match == 1
+                        point_view_mat(i,point_match,:) = inlier_points_p2(:,j);
+                    else
+                        point_view_mat(:,end+1,:) = 0;
+                        point_view_mat(i,end,:) = inlier_points_p2(:,j);
+                    end
+                else
+                    point_view_mat(:,end+1,:) = 0;
+                    point_view_mat(i,end,:) = inlier_points_p2(:,j);
+                end
             else
                 %% IGNORE THAT CASE
                 %% display(sprintf('Several matches: %d', n_point_match));
@@ -84,7 +120,7 @@ end
 
 if debug
     figure;
-    imshow(squeeze(point_view_mat(:,:,1)) == 0 & squeeze(point_view_mat(:,:,2)) == 0);
+    imagesc(squeeze(point_view_mat(:,:,1)) == 0 & squeeze(point_view_mat(:,:,2)) == 0);
 end
 
 merged_points_transformed = [];
