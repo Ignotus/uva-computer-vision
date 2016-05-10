@@ -7,17 +7,17 @@ format long g % turn off scientific notation
 
 %% Parameters
 debug = false;
-stitch = true;
-use_icp = true;
-check_prev_prev = true;
-teddy = true;
+stitch = false;
+use_icp = false;
+check_prev_prev = false;
+teddy = false;
 if teddy
     nframes = 16;
     K = 2;
 else
     nframes = 49;
     %% Numbers of consecutive frames to take in consideration
-    K = 2;
+    K = 3;
 end
 
 
@@ -169,7 +169,7 @@ for i=1:1:nframes-K+1
     V3 = V(:,1:3)';
     
     % Page 99
-    M = U3 * W3.^10;
+    M = U3 * W3.^(0.9);
     S = W3.^(0.1) * V3;
     merged_points = [merged_points S];
     
@@ -183,7 +183,7 @@ for i=1:1:nframes-K+1
         min_length = min(size(prev_points, 2), size(S, 2));
         
         if use_icp
-            [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S', 60, debug);
+            [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 60, debug);
         else
             [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
                 S(:, 1:min_length)', ...
