@@ -51,7 +51,9 @@ for i = 1:iters
     D_f(end, end) = 0;
     F = U_f * D_f * V_f';
     % Checks that matrix rank is 2 after
-    assert(rank(F) == 2);
+    if rank(F) ~= 2
+        continue
+    end
     
     % Denormalization
     F = T_2' * F * T_1;
@@ -87,6 +89,8 @@ for i = 1:iters
         inlier_points_p2 = temp_inliers_p2;
     end
    
-    max_inliers
-    min_outliers
+    max_inliers;
+    min_outliers;
 end
+
+min_outliers

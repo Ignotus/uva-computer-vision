@@ -1,29 +1,34 @@
 % 1.3: Normalized Eight Point algorithm with RANSAC
 
 function part1_3()
-clear all;
 close all;
 
 format long g % turn off scientific notation
 
 %% Parameters
-nframes = 49;
 debug = false;
-stitch = false;
-use_icp = true;
+stitch = true;
+use_icp = false;
 check_prev_prev = true;
-teddy = false;
-%% Numbers of consecutive frames to take in consideration
-K = 3;
+teddy = true;
+if teddy
+    nframes = 16;
+    K = 2;
+else
+    nframes = 49;
+    %% Numbers of consecutive frames to take in consideration
+    K = 3;
+end
+
 
 prev_frame = frame(1, teddy);
 [fr1, desc1] = vl_sift(prev_frame);
 
 display('Building point view matrix');
-for i=2:nframes
+for i=2:nframes+1
     display(sprintf('Iteration %d', i));
     % path to test with
-    current_frame = frame(i, teddy);
+    current_frame = frame(mod(i, nframes) + 1, teddy);
 
     % Obtain the matches.
     [fr2, matches, desc2, current_frame] = interest_points(prev_frame, current_frame,...
@@ -49,7 +54,7 @@ for i=2:nframes
     inlier_points_p2 = inlier_points_p2(1:2,:);
     
     if i == 2
-        point_view_mat = zeros(nframes, size(inlier_points_p2, 2), 2);
+        point_view_mat = zeros(nframes + 1, size(inlier_points_p2, 2), 2);
         point_view_mat(i-1,:,:) = inlier_points_p1';
         point_view_mat(i,:,:) = inlier_points_p2';
     else
@@ -96,6 +101,8 @@ for i=2:nframes
                         & point_view_mat(i-2,:,2) == inlier_points_p0(2,index);
                     n_point_match = sum(point_match);
                     if n_point_match == 1
+                        display('Found');
+                        point_view_mat(i-1,point_match,:) = (inlier_points_p2(:,j) + inlier_points_p0(:,index)) / 2;
                         point_view_mat(i,point_match,:) = inlier_points_p2(:,j);
                     else
                         point_view_mat(:,end+1,:) = 0;
@@ -118,20 +125,20 @@ for i=2:nframes
     desc1 = desc2;
 end
 
-if debug
+%if debug
     figure;
     imagesc(squeeze(point_view_mat(:,:,1)) == 0 & squeeze(point_view_mat(:,:,2)) == 0);
-end
+%end
 
 merged_points_transformed = [];
 merged_points = [];
 C = [];
 
-rotation = zeros(nframes-K, 3, 3);
-translation = zeros(nframes-K, 3, 1);
+rotation = zeros(nframes-K+1, 3, 3);
+translation = zeros(nframes-K+1, 3, 1);
 
 display('Stitching');
-for i=1:1:nframes-K
+for i=1:1:nframes-K+1
     display(sprintf('Iteration %d', i))
     try
         local_point_view = point_view_mat(i:i+K-1,:,:);
@@ -172,7 +179,7 @@ for i=1:1:nframes-K
             min_length = min(size(prev_points, 2), size(S, 2));
 
             if use_icp
-                [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 40, debug);
+                [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 60, debug);
             else
                 [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
                                                S(:, 1:min_length)', ...
@@ -193,6 +200,10 @@ for i=1:1:nframes-K
         end
         merged_points_transformed = [merged_points_transformed S];
         C = [C ones(1, size(S, 2)) * i];
+        
+        if i == 1
+            visualize(merged_points_transformed);
+        end
         if stitch == false
             C(1, end) = 10;
             break;
@@ -200,5 +211,10 @@ for i=1:1:nframes-K
     catch
     end
 end
+
+figure;
+scatter3(merged_points_transformed(1,:), merged_points_transformed(2,:), merged_points_transformed(3,:), 'r');
+
+visualize(merged_points, C);
 
 visualize(merged_points_transformed, C);
