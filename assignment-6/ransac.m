@@ -1,8 +1,14 @@
-function [F_max, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches)
+function [F_max, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches, teddy)
 %% PARAMETERS
-iters = 1000; % number of RANSAC iterations
+if teddy
+    iters = 1000; % number of RANSAC iterations
+    threshold = 10;
+else
+    iters = 200;
+    threshold = 1; % Sampson distance threshold
+end
 N = 9; % Sample size
-threshold = 1; % Sampson distance threshold
+
 
 %% RANSAC
 max_inliers = 0;

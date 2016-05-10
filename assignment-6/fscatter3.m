@@ -103,7 +103,7 @@ for j = 1:numclass
   jj = (ii(:)== j);
   if ~isempty(jj)
     k = k + 1;
-    h = plot3(X(jj),Y(jj),Z(jj),'.','color',col(j,:),'markersize',siz);
+    h = plot3(X(jj),Y(jj),Z(jj),'.','color',col(j,:),'markersize', 10);
     if ~isempty(h)
       o = o+1;
         hp(o) = h;

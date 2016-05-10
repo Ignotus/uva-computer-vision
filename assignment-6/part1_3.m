@@ -8,7 +8,7 @@ format long g % turn off scientific notation
 %% Parameters
 debug = false;
 stitch = true;
-use_icp = false;
+use_icp = true;
 check_prev_prev = true;
 teddy = true;
 if teddy
@@ -39,7 +39,7 @@ for i=2:nframes+1
                                                            fr1, desc1,...
                                                            debug, teddy, 0, 0);
 
-    [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches);
+    [F, inlier_points_p1, inlier_points_p2] = ransac(fr1, fr2, matches, teddy);
     display(sprintf('Inliers: %d', size(inlier_points_p2, 2)));
     if debug
         im1 = prev_frame;
@@ -68,7 +68,7 @@ for i=2:nframes+1
             [~, matches0, ~, current_frame] = interest_points(prev_prev_frame, current_frame,...
                                                                fr0, desc0,...
                                                                debug, teddy, fr2, desc2);
-            [~, inlier_points_p0, inlier_points_p2_0] = ransac(fr0, fr2, matches0);
+            [~, inlier_points_p0, inlier_points_p2_0] = ransac(fr0, fr2, matches0, teddy);
             inlier_points_p0 = inlier_points_p0(1:2,:);
             inlier_points_p2_0 = inlier_points_p2_0(1:2,:);
         end
@@ -87,7 +87,7 @@ for i=2:nframes+1
                     %% Add a new column to point-view matrix for each newly
                     %% introduced point.
                     point_view_mat(:,end+1,:) = 0;
-                    
+                    point_view_mat(i-1,end,:) = inlier_points_p1(:,j);
                     %% Adding this point to the last column
                     point_view_mat(i,end,:) = inlier_points_p2(:,j);
                     continue
@@ -110,10 +110,12 @@ for i=2:nframes+1
                         point_view_mat(i,point_match,:) = inlier_points_p2(:,j);
                     else
                         point_view_mat(:,end+1,:) = 0;
+                        point_view_mat(i-1,end,:) = inlier_points_p1(:,j);
                         point_view_mat(i,end,:) = inlier_points_p2(:,j);
                     end
                 else
                     point_view_mat(:,end+1,:) = 0;
+                    point_view_mat(i-1,end,:) = inlier_points_p1(:,j);
                     point_view_mat(i,end,:) = inlier_points_p2(:,j);
                 end
             else
@@ -144,75 +146,71 @@ translation = zeros(nframes-K+1, 3, 1);
 display('Stitching');
 for i=1:1:nframes-K+1
     display(sprintf('Iteration %d', i))
-    try
-        local_point_view = point_view_mat(i:i+K-1,:,:);
-        % Finding dense blocks
-        local_point_view = local_point_view(:, sum(sum(local_point_view, 3) > 0, 1) > K - 1, :);
-
-        %% Normalize the point coordinates by translating them to the mean of the
-        %% points in each view
-        local_point_view = bsxfun(@minus, local_point_view, mean(local_point_view, 2));
-        %% Constructing the measurement matrix D
-        [M, N, ~] = size(local_point_view);
-        D = zeros(2 * M, N);
-        for j=1:2
-            D(j:2:end,:) = local_point_view(:,:,j);
-        end
-
-        %% Applying SVD
-        [U, W, V] = svd(D);
-
-        %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
-        U3 = U(:,1:3);
-        W3 = W(1:3,1:3);
-        V3 = V(:,1:3)';
-
-        % Page 99
-        M = U3 * W3.^10;
-        S = W3.^(0.1) * V3;
-
-        merged_points = [merged_points S];
-
-        if debug
-            scatter3(S(1,:), S(2,:), S(3,:));
-        end
-
-        if i > 1
-            prev_points = merged_points(:, C == i - K);
-
-            min_length = min(size(prev_points, 2), size(S, 2));
-
-            if use_icp
-                [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S, 60, debug);
-            else
-                [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
-                                               S(:, 1:min_length)', ...
-                                               'scaling', false,...
-                                               'reflection', false);
-                if debug
-                    visualize([prev_points(:, 1:min_length) Z'], [ones(1, min_length) ones(1, min_length - 1) * 2 10]);
-                end
-
-                rotation(i, :, :) = transform.T;
-                translation(i, :, :) = transform.c(1, :);
-            end
-            S = S';
-            for k=i:-K:2
-                S = bsxfun(@plus, S * squeeze(rotation(k, :, :)), translation(k, :, :));
-            end
-            S = S';
-        end
-        merged_points_transformed = [merged_points_transformed S];
-        C = [C ones(1, size(S, 2)) * i];
+    local_point_view = point_view_mat(i:i+K-1,:,:);
+    % Finding dense blocks
+    local_point_view = local_point_view(:, sum(sum(local_point_view, 3) > 0, 1) > K - 1, :);
+    
+    %% Normalize the point coordinates by translating them to the mean of the
+    %% points in each view
+    local_point_view = bsxfun(@minus, local_point_view, mean(local_point_view, 2));
+    %% Constructing the measurement matrix D
+    [M, N, ~] = size(local_point_view);
+    D = zeros(2 * M, N);
+    for j=1:2
+        D(j:2:end,:) = local_point_view(:,:,j);
+    end
+    
+    %% Applying SVD
+    [U, W, V] = svd(D);
+    
+    %% Factorizing the measurement matrix. Page 97. Jan van Gemert's lecture.
+    U3 = U(:,1:3);
+    W3 = W(1:3,1:3);
+    V3 = V(:,1:3)';
+    
+    % Page 99
+    M = U3 * W3.^10;
+    S = W3.^(0.1) * V3;
+    merged_points = [merged_points S];
+    
+    if debug
+        scatter3(S(1,:), S(2,:), S(3,:));
+    end
+    
+    if i > 1
+        prev_points = merged_points(:, C == i - 1);
         
-        if i == 1
-            visualize(merged_points_transformed);
+        min_length = min(size(prev_points, 2), size(S, 2));
+        
+        if use_icp
+            [rotation(i, :, :), translation(i, :, :), ~] = ICP(prev_points, S', 60, debug);
+        else
+            [~, Z, transform] = procrustes(prev_points(:, 1:min_length)',...
+                S(:, 1:min_length)', ...
+                'scaling', false,...
+                'reflection', false);
+            if debug
+                visualize([prev_points(:, 1:min_length) Sr Z'], [ones(1, min_length) ones(1, min_length) * 5 ones(1, min_length - 1) * 10 20]);
+            end
+            
+            rotation(i, :, :) = transform.T;
+            translation(i, :, :) = transform.c(1, :);
         end
-        if stitch == false
-            C(1, end) = 10;
-            break;
+        S = S';
+        for k=i:-K:2
+            S = bsxfun(@plus, S * squeeze(rotation(k, :, :)), translation(k, :, :));
         end
-    catch
+        S = S';
+    end
+    merged_points_transformed = [merged_points_transformed S];
+    C = [C ones(1, size(S, 2)) * i];
+    
+    if i == 1
+        visualize(merged_points_transformed);
+    end
+    if stitch == false
+        C(1, end) = 10;
+        break;
     end
 end
 
@@ -220,5 +218,7 @@ figure;
 scatter3(merged_points_transformed(1,:), merged_points_transformed(2,:), merged_points_transformed(3,:), 'r');
 
 visualize(merged_points, C);
+
+visualize(merged_points_transformed);
 
 visualize(merged_points_transformed, C);
