@@ -16,7 +16,8 @@ The following project contains matlab implementation of algorithms for:
 
 ### Computer Vision 2
 
-- Iterative Closest Point ([Assignment 1](assignment-5))
+- Iterative Closest Point ([Assignment 1](assignment-5), [Report](assignment-5/report.pdf))
+- Structure from Motion ([Assignment 2](assignment-6), [Report](assignment-6/report.pdf))
 
 ## Dependencies
 
