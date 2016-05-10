@@ -1,12 +1,13 @@
 function [fr2,matches,desc2, im2] = interest_points(im1, im2, fr1, desc1, debug, teddy)
     % run sift with matching features.
     [fr2, desc2] = vl_sift(im2);
-    
-    [matches, ~] = vl_ubcmatch(desc1, desc2, 5);
-    
+
     if teddy
+        [matches, ~] = vl_ubcmatch(desc1, desc2, 3);
         distances = sqrt(sum((fr1(1:2, matches(1,:)) - fr2(1:2, matches(2,:))).^2, 1));
         matches = matches(:, distances > 5);
+    else
+        [matches, ~] = vl_ubcmatch(desc1, desc2, 5);
     end
     
     if debug
