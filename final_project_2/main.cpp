@@ -3,6 +3,7 @@
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <pcl/visualization/pcl_visualizer.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/eigen.hpp>
     
@@ -41,8 +42,20 @@ int main(int argc, char *argv[]) {
         Frame3D frame;
         frame.load(boost::str((boost::format("%s/%05d.3df") % argv[1] % i)));
         
-        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 0.5);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 1.7);
         std::cout << "Points obtained " << point_cloud->size() << std::endl;
+        
+        boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
+        viewer->setBackgroundColor(0, 0, 0);
+        viewer->addPointCloud<pcl::PointXYZ>(point_cloud, "sample cloud");
+        viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
+        viewer->addCoordinateSystem(1.0);
+        viewer->initCameraParameters();
+        
+        while (!viewer->wasStopped()) {
+            viewer->spinOnce(100);
+            boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+        }
     }
 
     return 0;
