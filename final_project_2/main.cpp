@@ -3,6 +3,7 @@
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <pcl/features/integral_image_normal.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -34,6 +35,20 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr mat2IntegralPointCloud(const cv::Mat& depth_
 }
 
 
+pcl::PointCloud<pcl::PointNormal>::Ptr computeNormals(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normals(new pcl::PointCloud<pcl::PointNormal>); // Output datasets
+    pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::PointNormal> ne;
+    ne.setNormalEstimationMethod(ne.AVERAGE_3D_GRADIENT);
+    ne.setMaxDepthChangeFactor(0.02f);
+    ne.setNormalSmoothingSize(10.0f);
+    ne.setInputCloud(cloud);
+    ne.compute(*cloud_normals);
+    pcl::copyPointCloud(*cloud, *cloud_normals);
+    return cloud_normals;
+}
+
+
+
 int main(int argc, char *argv[]) {
     if (argc != 2)
         return 0;
@@ -44,6 +59,8 @@ int main(int argc, char *argv[]) {
         
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 1.7);
         std::cout << "Points obtained " << point_cloud->size() << std::endl;
+        
+        pcl::PointCloud<pcl::PointNormal>::Ptr normals = computeNormals(point_cloud);
         
         boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
         viewer->setBackgroundColor(0, 0, 0);
