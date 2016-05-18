@@ -6,6 +6,11 @@
 #include <pcl/features/integral_image_normal.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/common/transforms.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/surface/poisson.h>
+#include <pcl/filters/voxel_grid.h>
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -56,28 +61,58 @@ pcl::PointCloud<pcl::PointNormal>::Ptr transformPointCloudNormals(pcl::PointClou
     return transformed_cloud;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2)
-        return 0;
-
+pcl::PointCloud<pcl::PointNormal>::Ptr merge(Frame3D frames[]) {
     pcl::PointCloud<pcl::PointNormal>::Ptr model_point_cloud_norm(new pcl::PointCloud<pcl::PointNormal>());
     for (int i = 0; i < 8; ++i) {
-        Frame3D frame;
-        frame.load(boost::str((boost::format("%s/%05d.3df") % argv[1] % i)));
-        
-        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 1.4);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frames[i].depth_image_, frames[i].focal_length_, 1.4);
         std::cout << "Points obtained " << point_cloud->size() << std::endl;
         
         pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normals = computeNormals(point_cloud);
         
-        point_cloud_with_normals = transformPointCloudNormals(point_cloud_with_normals, frame);
+        point_cloud_with_normals = transformPointCloudNormals(point_cloud_with_normals, frames[i]);
         *model_point_cloud_norm += *point_cloud_with_normals;
     }
+    
+    return model_point_cloud_norm;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2)
+        return 0;
+    
+    Frame3D frames[8];
+    for (int i = 0; i < 8; ++i) {
+        frames[i].load(boost::str((boost::format("%s/%05d.3df") % argv[1] % i)));
+    }
+
+    std::cout << "Merging point cloud" << std::endl;
+    pcl::PointCloud<pcl::PointNormal>::Ptr model_point_cloud_norm = merge(frames);
+    
+    std::cout << "Got: " << model_point_cloud_norm->size() << " points" << std::endl;
+    std::cout << "Generating mesh" << std::endl;
+    
+    pcl::PointCloud<pcl::PointNormal>::Ptr reduced_point_cloud(new pcl::PointCloud<pcl::PointNormal>());
+    pcl::PassThrough<pcl::PointNormal> filter;
+
+    filter.setInputCloud(model_point_cloud_norm);
+    filter.filter(*reduced_point_cloud);
+    std::cout << "Got: " << reduced_point_cloud->size() << " points" << std::endl;
+
+    pcl::Poisson<pcl::PointNormal> rec;
+    rec.setDepth(8);
+    rec.setInputCloud(reduced_point_cloud);
+
+    pcl::PolygonMesh triangles;
+    rec.performReconstruction(triangles);
+
+    std::cout << "Finished" << std::endl;
 
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
     viewer->setBackgroundColor(0, 0, 0);
-    viewer->addPointCloudNormals<pcl::PointNormal>(model_point_cloud_norm, 10, 0.05, "normals");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "normals");
+    //viewer->addPointCloudNormals<pcl::PointNormal>(model_point_cloud_norm, 10, 0.05, "normals");
+    //viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "normals");
+    
+    viewer->addPolygonMesh(triangles, "meshes", 0);
     viewer->addCoordinateSystem(1.0);
     viewer->initCameraParameters();
 
