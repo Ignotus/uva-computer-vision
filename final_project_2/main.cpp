@@ -5,6 +5,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/features/integral_image_normal.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/common/transforms.h>
+
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/eigen.hpp>
     
@@ -48,32 +50,40 @@ pcl::PointCloud<pcl::PointNormal>::Ptr computeNormals(pcl::PointCloud<pcl::Point
 }
 
 
+pcl::PointCloud<pcl::PointNormal>::Ptr transformPointCloudNormals(pcl::PointCloud<pcl::PointNormal>::Ptr cloud, const Frame3D& frame) {
+    pcl::PointCloud<pcl::PointNormal>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointNormal>());
+    pcl::transformPointCloudWithNormals(*cloud, *transformed_cloud, frame.getEigenTransform());
+    return transformed_cloud;
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2)
         return 0;
 
+    pcl::PointCloud<pcl::PointNormal>::Ptr model_point_cloud_norm(new pcl::PointCloud<pcl::PointNormal>());
     for (int i = 0; i < 8; ++i) {
         Frame3D frame;
         frame.load(boost::str((boost::format("%s/%05d.3df") % argv[1] % i)));
         
-        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 1.7);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = mat2IntegralPointCloud(frame.depth_image_, frame.focal_length_, 1.4);
         std::cout << "Points obtained " << point_cloud->size() << std::endl;
         
-        pcl::PointCloud<pcl::PointNormal>::Ptr normals = computeNormals(point_cloud);
+        pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normals = computeNormals(point_cloud);
         
-        boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
-        viewer->setBackgroundColor(0, 0, 0);
-        viewer->addPointCloud<pcl::PointXYZ>(point_cloud, "sample cloud");
-        viewer->addPointCloudNormals<pcl::PointXYZ, pcl::PointNormal>(point_cloud, normals, 10, 0.05, "normals");
-        viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
-        viewer->addCoordinateSystem(1.0);
-        viewer->initCameraParameters();
-        
-        while (!viewer->wasStopped()) {
-            viewer->spinOnce(100);
-            boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-        }
+        point_cloud_with_normals = transformPointCloudNormals(point_cloud_with_normals, frame);
+        *model_point_cloud_norm += *point_cloud_with_normals;
+    }
+
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    viewer->setBackgroundColor(0, 0, 0);
+    viewer->addPointCloudNormals<pcl::PointNormal>(model_point_cloud_norm, 10, 0.05, "normals");
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "normals");
+    viewer->addCoordinateSystem(1.0);
+    viewer->initCameraParameters();
+
+    while (!viewer->wasStopped()) {
+        viewer->spinOnce(100);
+        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
 
     return 0;
