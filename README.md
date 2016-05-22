@@ -1,6 +1,6 @@
 # Computer Vision Team Project
 
-[![License](http://img.shields.io/:license-mit-blue.svg)](LICENSE)
+[![UVA](http://www.uva-nemo.org/images/uva_logo_40.png)](http://www.english.uva.nl/) ![ISLA](http://www.uva-nemo.org/images/isla_40.png)
 
 ## Description
 
