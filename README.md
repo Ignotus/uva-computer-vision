@@ -1,8 +1,6 @@
 # Computer Vision Team Project
 
-[![License](http://img.shields.io/:license-mit-blue.svg)](LICENSE)
-
-## Description
+[![UVA](http://www.uva-nemo.org/images/uva_logo_40.png)](http://www.english.uva.nl/) ![ISLA](http://www.uva-nemo.org/images/isla_40.png)
 
 The following project contains matlab implementation of algorithms for:
 
@@ -19,6 +17,7 @@ The following project contains matlab implementation of algorithms for:
 - Iterative Closest Point ([Assignment 1](assignment-5), [Report](assignment-5/report.pdf))
 - Structure from Motion ([Assignment 2](assignment-6), [Report](assignment-6/report.pdf))
 
+#### Slides
 - Slides for a talk about R-CNN papers ([PDF](slides/faster-r-cnn.pdf))
 
 ## Dependencies
