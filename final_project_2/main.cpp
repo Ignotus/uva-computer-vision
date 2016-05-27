@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Got: " << reduced_point_cloud->size() << " points" << std::endl;
     
     pcl::Poisson<pcl::PointNormal> rec;
-    rec.setDepth(8);
+    rec.setDepth(10);
     rec.setInputCloud(reduced_point_cloud);
 
     pcl::PolygonMesh triangles;
@@ -267,6 +267,60 @@ int main(int argc, char *argv[]) {
         }
         
         std::cout << point_found << " points found" << std::endl;
+    }
+    
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr textured_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    textured_cloud->reserve(cloud->size());
+    
+    for (const pcl::PointXYZRGB& point : *cloud) {
+        if (point.r != 0 || point.g != 0 || point.b != 0) {
+            textured_cloud->push_back(point);
+        }
+    }
+    
+    // Filling gaps
+    pcl::KdTreeFLANN<pcl::PointXYZRGB>::Ptr tree2(new pcl::KdTreeFLANN<pcl::PointXYZRGB>);
+    tree2->setInputCloud(textured_cloud);
+    for (pcl::PointXYZRGB& point : *cloud) {
+        if (point.r != 0 || point.g != 0 || point.b != 0)
+            continue;
+        
+        std::vector<int> k_indices;
+        std::vector<float> k_dist;
+        tree2->nearestKSearch(point, 1, k_indices, k_dist);
+        
+        const pcl::PointXYZRGB& textured_point = textured_cloud->at(k_indices[0]);
+        point.r = textured_point.r;
+        point.g = textured_point.g;
+        point.b = textured_point.b;
+    }
+   
+   // Smoothing
+   tree2->setInputCloud(cloud);
+   for (pcl::PointXYZRGB& point : *cloud) {
+        if (point.r != 0 || point.g != 0 || point.b != 0)
+            continue;
+        
+        std::vector<int> k_indices;
+        std::vector<float> k_dist;
+        tree2->nearestKSearch(point, 5, k_indices, k_dist);
+        
+        int r = 0;
+        int g = 0;
+        int b = 0;
+        for (int i = 0; i < 5; ++i) {
+            const pcl::PointXYZRGB& textured_point = textured_cloud->at(k_indices[i]);
+            r += textured_point.r;
+            g += textured_point.g;
+            b += textured_point.b;
+        }
+        
+        r /= 5;
+        g /= 5;
+        b /= 5;
+        point.r = (uint8_t) r;
+        point.g = (uint8_t) g;
+        point.b = (uint8_t) b;
     }
     
     pcl::toPCLPointCloud2(*cloud, triangles.cloud);
