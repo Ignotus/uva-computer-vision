@@ -23,8 +23,16 @@ The following project contains matlab implementation of algorithms for:
 
 ## Dependencies
 
+For Matlab code:
 - [VLFeat](http://www.vlfeat.org/install-matlab.html)
 - [libsvm](https://www.csie.ntu.edu.tw/~cjlin/libsvm/)
+
+For C++ code:
+- cmake
+- OpenCV >= 3.0
+- PCL
+- VTK
+- C++11 supported compiler
 
 ## Configuring
 

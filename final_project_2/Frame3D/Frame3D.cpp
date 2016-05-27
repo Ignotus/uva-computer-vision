@@ -100,6 +100,7 @@ void Frame3D::setTranformation(cv::Mat &transformation) {
 Eigen::Matrix4f Frame3D::getEigenTransform() const {
 	Eigen::Matrix4f eigen_matrix;
 	cv2eigen(transformation_, eigen_matrix);
+        eigen_matrix(3, 3) = 1.;
 	return eigen_matrix;
 }
 #endif
