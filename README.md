@@ -11,14 +11,18 @@ The following project contains matlab implementation of algorithms for:
 - Harris Corner Detector and tracking with Optical Flow ([Assignment 3](assignment-3), [Report](assignment-3/report.pdf))
 - Image Stitching and Alignment ([Assignment 4](assignment-4), [Report](assignment-4/report.pdf))
 - Bag of words image classification ([Final Project](final-project), [Report](final-project/report.pdf))
+  ![screen](./final-project/screen.png =480x)
 
 ### Computer Vision 2
 
 - Iterative Closest Point ([Assignment 1](assignment-5), [Report](assignment-5/report.pdf))
 - Structure from Motion ([Assignment 2](assignment-6), [Report](assignment-6/report.pdf))
+- 3D meshing and texturing ([Final Project](final_project_2), [Report](final_project_2/cv2-final-assignment.pdf))
+  ![screen](./final_project_2/screenshot/1.png =480x)
 
 #### Slides
 - Slides for a talk about R-CNN papers ([PDF](slides/faster-r-cnn.pdf))
+
 
 ## Dependencies
 
@@ -29,8 +33,8 @@ For Matlab code:
 For C++ code:
 - cmake
 - OpenCV >= 3.0
-- PCL
-- VTK
+- PCL >= 1.7.0
+- VTK >= 6.0
 - C++11 supported compiler
 
 ## Configuring
