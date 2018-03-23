@@ -55,7 +55,7 @@ Copyright (c) 2016 Minh Ngo, Riaan Zoetmulder ^
 
 <sup>^ These authors contributed equally to this work inspite of the fact that one doesn't use git :)</sup>
 
-This project is distributed under the [MIT license](LICENSE). It's a part of the Computer Vision 1 and Computer Vision 2 courses taught by Theo Gevers and guest lectures at the University of Amsterdam. Please follow the [UvA regulations governing Fraud and Plagiarism](http://student.uva.nl/en/az/content/plagiarism-and-fraud/plagiarism-and-fraud.html) in the case if you are a student.
+This project is distributed under the [MIT license](LICENSE). It's a part of the Computer Vision 1 and Computer Vision 2 courses taught by Theo Gevers and guest lecturers at the University of Amsterdam. Please follow the [UvA regulations governing Fraud and Plagiarism](https://student.uva.nl/en/content/az/plagiarism-and-fraud/plagiarism-and-fraud.html) in the case if you are a student.
 
 [fscatter3](assignment-5/fscatter3.m) is distributed under the BSD 2-Clause license. [VLFeat](http://www.vlfeat.org/license.html) is distributed under the BSD license. SIFT image descriptor used in our project is [patented](http://www.google.com/patents/US6711293) by David Lowe (University of British Columbia) and cannot be used for comercial purpose.
 
